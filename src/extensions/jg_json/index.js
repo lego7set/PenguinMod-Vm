@@ -181,6 +181,21 @@ class JgJSONBlocks {
                     text: 'json [json] has key [key] ?'
                 },
                 {
+                    opcode: 'json_combine',
+                    blockType: BlockType.REPORTER,
+                    arguments: {
+                        one: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "{}"
+                        },
+                        two: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "{}"
+                        }
+                    },
+                    text: 'combine json [one] and json [two]'
+                },
+                {
                     blockType: BlockType.LABEL,
                     text: "Arrays"
                 },
@@ -796,6 +811,13 @@ class JgJSONBlocks {
     }
     json_array_validate (args) {
         return validateArray(args.array).isValid;
+    }
+
+    json_combine (args) {
+        const one = validateJSON(args.one).object;
+        const two = validateJSON(args.two).object;
+
+        return JSON.stringify(Object.assign(one, two));
     }
 }
 
