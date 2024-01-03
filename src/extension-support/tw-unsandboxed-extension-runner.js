@@ -116,6 +116,8 @@ const setupUnsandboxedExtensionAPI = vm => new Promise(resolve => {
         return vm.securityManager.canEmbed(parsed.href);
     };
 
+    Scratch.canUnsandbox = async () => vm.securityManager.canUnsandbox();
+
     Scratch.translate = createTranslate(vm);
 
     global.Scratch = Scratch;

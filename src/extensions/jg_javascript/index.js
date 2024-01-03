@@ -16,7 +16,7 @@ class jgJavascript {
          * @type {runtime}
          */
         this.runtime = runtime;
-        this.util;
+        this.runningEditorUnsandboxed = false;
     }
 
     /**
@@ -26,13 +26,26 @@ class jgJavascript {
         return {
             id: 'jgJavascript',
             name: 'JavaScript',
+            isDynamic: true,
             // color1: '#EFC900', look like doo doo
             blocks: [
+                {
+                    opcode: 'unsandbox',
+                    text: 'Run Unsandboxed',
+                    blockType: BlockType.BUTTON,
+                    hideFromPalette: this.runningEditorUnsandboxed
+                },
+                {
+                    opcode: 'sandbox',
+                    text: 'Run Sandboxed',
+                    blockType: BlockType.BUTTON,
+                    hideFromPalette: !this.runningEditorUnsandboxed
+                },
                 {
                     opcode: 'javascriptHat',
                     text: 'when javascript [CODE] == true',
                     blockType: BlockType.HAT,
-                    hideFromPalette: true, // this block seems to cause strange behavior because of how sandboxed eval is done
+                    hideFromPalette: !this.runningEditorUnsandboxed, // this block seems to cause strange behavior because of how sandboxed eval is done
                     arguments: {
                         CODE: {
                             type: ArgumentType.STRING,
@@ -74,25 +87,59 @@ class jgJavascript {
                             defaultValue: "Math.round(Math.random()) === 1"
                         }
                     }
-                }
+                },
+                {
+                    blockType: BlockType.LABEL,
+                    text: 'You can run unsandboxed',
+                    hideFromPalette: !this.runningEditorUnsandboxed
+                },
+                {
+                    blockType: BlockType.LABEL,
+                    text: 'when packaging the project.',
+                    hideFromPalette: !this.runningEditorUnsandboxed
+                },
+                {
+                    blockType: BlockType.LABEL,
+                    text: '⠀',
+                    hideFromPalette: !this.runningEditorUnsandboxed
+                },
+                {
+                    blockType: BlockType.LABEL,
+                    text: 'Player Options >',
+                    hideFromPalette: !this.runningEditorUnsandboxed
+                },
+                {
+                    blockType: BlockType.LABEL,
+                    text: 'Remove sandbox on the JavaScript Ext.',
+                    hideFromPalette: !this.runningEditorUnsandboxed
+                },
             ]
         };
+    }
+
+    async unsandbox() {
+        const unsandbox = await this.runtime.vm.securityManager.canUnsandbox('JavaScript');
+        if (!unsandbox) return;
+        this.runningEditorUnsandboxed = true;
+        this.runtime.vm.emitWorkspaceUpdate();
+    }
+    sandbox() {
+        this.runningEditorUnsandboxed = false;
+        this.runtime.vm.emitWorkspaceUpdate();
     }
 
     // util
     evaluateCode(code) {
         // used for packager
-        if (this.runtime.extensionRuntimeOptions.javascriptUnsandboxed === true) {
-            return new Promise((resolve) => {
-                let result;
-                try {
-                    // eslint-disable-next-line no-eval
-                    result = eval(code);
-                } catch (err) {
-                    result = err;
-                }
-                resolve(result);
-            });
+        if (this.runtime.extensionRuntimeOptions.javascriptUnsandboxed === true || this.runningEditorUnsandboxed) {
+            let result;
+            try {
+                // eslint-disable-next-line no-eval
+                result = eval(code);
+            } catch (err) {
+                result = err;
+            }
+            return result;
         }
         // we are not packaged
         return new Promise((resolve) => {
@@ -105,28 +152,34 @@ class jgJavascript {
     }
 
     // blocks
-    javascriptStack(args, util) {
-        this.util = util;
+    javascriptStack(args) {
         const code = Cast.toString(args.CODE);
         return this.evaluateCode(code);
     }
-    javascriptString(args, util) {
-        this.util = util;
+    javascriptString(args) {
         const code = Cast.toString(args.CODE);
         return this.evaluateCode(code);
     }
-    javascriptBool(args, util) {
-        this.util = util;
-        return new Promise((resolve) => {
-            const code = Cast.toString(args.CODE);
-            this.evaluateCode(code).then(value => {
-                resolve(Boolean(value));
+    javascriptBool(args) {
+        const code = Cast.toString(args.CODE);
+        const possiblePromise = this.evaluateCode(code);
+        if (possiblePromise && typeof possiblePromise.then === 'function') {
+            return (async () => {
+                const value = await possiblePromise;
+                return Boolean(value); // this is a JavaScript extension, we should use the JavaScript way of determining booleans
             });
-        })
+        }
+        return Boolean(possiblePromise);
     }
     javascriptHat(...args) {
-        // its the same thing lol
-        return this.javascriptBool(...args);
+        if (!this.runtime.extensionRuntimeOptions.javascriptUnsandboxed && !this.runningEditorUnsandboxed) {
+            return false; // we will cause issues otherwise, edging hats cause weird issues when waiting for promises each frame
+        }
+        const possiblePromise = this.javascriptBool(...args);
+        if (possiblePromise && typeof possiblePromise.then === 'function') {
+            return false; // we will cause issues otherwise, edging hats cause weird issues when waiting for promises each frame
+        }
+        return possiblePromise;
     }
 }
 
