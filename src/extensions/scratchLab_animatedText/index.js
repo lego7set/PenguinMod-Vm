@@ -301,193 +301,196 @@ class Scratch3TextBlocks {
                 text: 'get height of the text',
                 blockType: BlockType.REPORTER
             },
+            {
+                opcode: "getDisplayedText",
+                blockType: BlockType.REPORTER,
+                text: ("displayed text")
+            },
+            {
+                opcode: "getRender",
+                blockType: BlockType.REPORTER,
+                text: ("get data uri of last rendered text")
+            },
 
-                // TODO: Give these blocks actual functionality.
-                //       Most of them can be done easily.
+            // TODO: Give these blocks actual functionality.
+            //       Most of them can be done easily.
 
-                // TURBOWARP BLOCKS (added for compatibility reasons)
-                // TURBOWARP BLOCKS (added for compatibility reasons)
-                // TURBOWARP BLOCKS (added for compatibility reasons)
-                // TURBOWARP BLOCKS (added for compatibility reasons)
-                // TURBOWARP BLOCKS (added for compatibility reasons)
-                // TURBOWARP BLOCKS (added for compatibility reasons)
+            // TURBOWARP BLOCKS (added for compatibility reasons)
+            // TURBOWARP BLOCKS (added for compatibility reasons)
+            // TURBOWARP BLOCKS (added for compatibility reasons)
+            // TURBOWARP BLOCKS (added for compatibility reasons)
+            // TURBOWARP BLOCKS (added for compatibility reasons)
+            // TURBOWARP BLOCKS (added for compatibility reasons)
 
-                // TODO: Give these blocks actual functionality.
-                //       Most of them can be done easily.
+            // TODO: Give these blocks actual functionality.
+            //       Most of them can be done easily.
 
-                {
-                    opcode: "setAlignment",
-                    blockType: BlockType.COMMAND,
-                    text: ("(NOT USABLE YET) align text to [ALIGN]"),
-                    hideFromPalette: true,
-                    arguments: {
-                        ALIGN: {
-                            type: ArgumentType.STRING,
-                            menu: "twAlign",
-                        },
+            {
+                opcode: "setAlignment",
+                blockType: BlockType.COMMAND,
+                text: ("(NOT USABLE YET) align text to [ALIGN]"),
+                hideFromPalette: true,
+                arguments: {
+                    ALIGN: {
+                        type: ArgumentType.STRING,
+                        menu: "twAlign"
+                    }
+                }
+            },
+            {
+                // why is the other block called "setWidth" :(
+                opcode: "setWidthValue",
+                blockType: BlockType.COMMAND,
+                text: ("(NOT USABLE YET) set width to [WIDTH]"),
+                hideFromPalette: true,
+                arguments: {
+                    WIDTH: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 200
+                    }
+                }
+            },
+            {
+                opcode: "resetWidth",
+                blockType: BlockType.COMMAND,
+                text: ("(NOT USABLE YET) reset text width"),
+                hideFromPalette: true
+            },
+            "---",
+            {
+                opcode: "getLines",
+                blockType: BlockType.REPORTER,
+                text: ("(NOT USABLE YET) # of lines"),
+                hideFromPalette: true,
+                disableMonitor: true
+            },
+            "---",
+            {
+                opcode: "startAnimate",
+                blockType: BlockType.COMMAND,
+                text: ("(NOT USABLE YET) start [ANIMATE] animation"),
+                hideFromPalette: true,
+                arguments: {
+                    ANIMATE: {
+                        type: ArgumentType.STRING,
+                        menu: "twAnimate",
+                        defaultValue: "rainbow"
+                    }
+                }
+            },
+            {
+                opcode: "animateUntilDone",
+                blockType: BlockType.COMMAND,
+                text: ("(NOT USABLE YET) animate [ANIMATE] until done"),
+                hideFromPalette: true,
+                arguments: {
+                    ANIMATE: {
+                        type: ArgumentType.STRING,
+                        menu: "twAnimate",
+                        defaultValue: "rainbow"
+                    }
+                }
+            },
+            {
+                opcode: "isAnimating",
+                blockType: BlockType.BOOLEAN,
+                text: ("(NOT USABLE YET) is animating?"),
+                hideFromPalette: true,
+                disableMonitor: true
+            },
+            "---",
+            {
+                opcode: "setAnimateDuration",
+                blockType: BlockType.COMMAND,
+                text: ("(NOT USABLE YET) set [ANIMATE] duration to [NUM] seconds"),
+                hideFromPalette: true,
+                arguments: {
+                    ANIMATE: {
+                        type: ArgumentType.STRING,
+                        menu: "twAnimateDuration",
+                        defaultValue: "rainbow"
                     },
+                    NUM: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 3
+                    }
+                }
+            },
+            {
+                opcode: "resetAnimateDuration",
+                blockType: BlockType.COMMAND,
+                text: ("(NOT USABLE YET) reset [ANIMATE] duration"),
+                hideFromPalette: true,
+                arguments: {
+                    ANIMATE: {
+                        type: ArgumentType.STRING,
+                        menu: "twAnimateDuration",
+                        defaultValue: "rainbow"
+                    }
+                }
+            },
+            {
+                opcode: "getAnimateDuration",
+                blockType: BlockType.REPORTER,
+                text: ("(NOT USABLE YET) [ANIMATE] duration"),
+                hideFromPalette: true,
+                arguments: {
+                    ANIMATE: {
+                        type: ArgumentType.STRING,
+                        menu: "twAnimateDuration",
+                        defaultValue: "rainbow"
+                    }
+                }
+            },
+            "---",
+            {
+                opcode: "setTypeDelay",
+                blockType: BlockType.COMMAND,
+                text: ("(NOT USABLE YET) set typing delay to [NUM] seconds"),
+                hideFromPalette: true,
+                arguments: {
+                    NUM: {
+                        type: ArgumentType.NUMBER,
+                        defaultValue: 0.1
+                    }
+                }
+            },
+            {
+                opcode: "resetTypeDelay",
+                blockType: BlockType.COMMAND,
+                text: ("(NOT USABLE YET) reset typing delay"),
+                hideFromPalette: true
+            },
+            {
+                opcode: "getTypeDelay",
+                blockType: BlockType.REPORTER,
+                text: ("(NOT USABLE YET) typing delay"),
+                hideFromPalette: true,
+                disableMonitor: true
+            },
+            "---",
+            {
+                opcode: "textActive",
+                blockType: BlockType.BOOLEAN,
+                text: ("(TURBOWARP BLOCK) is showing text?"),
+                hideFromPalette: true,
+                disableMonitor: true
+            },
+            {
+                opcode: "getTextAttribute",
+                blockType: BlockType.REPORTER,
+                text: "(NOT USABLE YET) text [ATTRIBUTE]",
+                arguments: {
+                    ATTRIBUTE: {
+                        type: ArgumentType.STRING,
+                        menu: "attribute"
+                    }
                 },
-                {
-                    // why is the other block called "setWidth" :(
-                    opcode: "setWidthValue",
-                    blockType: BlockType.COMMAND,
-                    text: ("(NOT USABLE YET) set width to [WIDTH]"),
-                    hideFromPalette: true,
-                    arguments: {
-                        WIDTH: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 200,
-                        },
-                    },
-                },
-                {
-                    opcode: "resetWidth",
-                    blockType: BlockType.COMMAND,
-                    text: ("(NOT USABLE YET) reset text width"),
-                    hideFromPalette: true,
-                },
-                "---",
-                {
-                    opcode: "getLines",
-                    blockType: BlockType.REPORTER,
-                    text: ("(NOT USABLE YET) # of lines"),
-                    hideFromPalette: true,
-                    disableMonitor: true,
-                },
-                "---",
-                {
-                    opcode: "startAnimate",
-                    blockType: BlockType.COMMAND,
-                    text: ("(NOT USABLE YET) start [ANIMATE] animation"),
-                    hideFromPalette: true,
-                    arguments: {
-                        ANIMATE: {
-                            type: ArgumentType.STRING,
-                            menu: "twAnimate",
-                            defaultValue: "rainbow",
-                        },
-                    },
-                },
-                {
-                    opcode: "animateUntilDone",
-                    blockType: BlockType.COMMAND,
-                    text: ("(NOT USABLE YET) animate [ANIMATE] until done"),
-                    hideFromPalette: true,
-                    arguments: {
-                        ANIMATE: {
-                            type: ArgumentType.STRING,
-                            menu: "twAnimate",
-                            defaultValue: "rainbow",
-                        },
-                    },
-                },
-                {
-                    opcode: "isAnimating",
-                    blockType: BlockType.BOOLEAN,
-                    text: ("(NOT USABLE YET) is animating?"),
-                    hideFromPalette: true,
-                    disableMonitor: true,
-                },
-                "---",
-                {
-                    opcode: "setAnimateDuration",
-                    blockType: BlockType.COMMAND,
-                    text: ("(NOT USABLE YET) set [ANIMATE] duration to [NUM] seconds"),
-                    hideFromPalette: true,
-                    arguments: {
-                        ANIMATE: {
-                            type: ArgumentType.STRING,
-                            menu: "twAnimateDuration",
-                            defaultValue: "rainbow",
-                        },
-                        NUM: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 3,
-                        },
-                    },
-                },
-                {
-                    opcode: "resetAnimateDuration",
-                    blockType: BlockType.COMMAND,
-                    text: ("(NOT USABLE YET) reset [ANIMATE] duration"),
-                    hideFromPalette: true,
-                    arguments: {
-                        ANIMATE: {
-                            type: ArgumentType.STRING,
-                            menu: "twAnimateDuration",
-                            defaultValue: "rainbow",
-                        },
-                    },
-                },
-                {
-                    opcode: "getAnimateDuration",
-                    blockType: BlockType.REPORTER,
-                    text: ("(NOT USABLE YET) [ANIMATE] duration"),
-                    hideFromPalette: true,
-                    arguments: {
-                        ANIMATE: {
-                            type: ArgumentType.STRING,
-                            menu: "twAnimateDuration",
-                            defaultValue: "rainbow",
-                        },
-                    },
-                },
-                "---",
-                {
-                    opcode: "setTypeDelay",
-                    blockType: BlockType.COMMAND,
-                    text: ("(NOT USABLE YET) set typing delay to [NUM] seconds"),
-                    hideFromPalette: true,
-                    arguments: {
-                        NUM: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: 0.1,
-                        },
-                    },
-                },
-                {
-                    opcode: "resetTypeDelay",
-                    blockType: BlockType.COMMAND,
-                    text: ("(NOT USABLE YET) reset typing delay"),
-                    hideFromPalette: true,
-                },
-                {
-                    opcode: "getTypeDelay",
-                    blockType: BlockType.REPORTER,
-                    text: ("(NOT USABLE YET) typing delay"),
-                    hideFromPalette: true,
-                    disableMonitor: true,
-                },
-                "---",
-                {
-                    opcode: "textActive",
-                    blockType: BlockType.BOOLEAN,
-                    text: ("(NOT USABLE YET) is showing text?"),
-                    hideFromPalette: true,
-                    disableMonitor: true,
-                },
-                {
-                    opcode: "getDisplayedText",
-                    blockType: BlockType.REPORTER,
-                    text: ("(NOT USABLE YET) displayed text"),
-                    hideFromPalette: true,
-                    disableMonitor: true,
-                },
-                {
-                    opcode: "getTextAttribute",
-                    blockType: BlockType.REPORTER,
-                    text: "(NOT USABLE YET) text [ATTRIBUTE]",
-                    arguments: {
-                        ATTRIBUTE: {
-                            type: ArgumentType.STRING,
-                            menu: "attribute",
-                        },
-                    },
-                    disableMonitor: true,
-                    hideFromPalette: true,
-                },
+                disableMonitor: true,
+                hideFromPalette: true
+            }
         
-        ],
+            ],
             menus: {
                 FONT: {
                     items: '_getFonts',
@@ -523,48 +526,48 @@ class Scratch3TextBlocks {
                     items: [
                         {
                             text: ("type"),
-                            value: "type",
+                            value: "type"
                         },
                         {
                             text: ("rainbow"),
-                            value: "rainbow",
+                            value: "rainbow"
                         },
                         {
                             text: ("zoom"),
-                            value: "zoom",
-                        },
-                    ],
+                            value: "zoom"
+                        }
+                    ]
                 },
                 twAnimateDuration: {
                     acceptReporters: true,
                     items: [
                         {
                             text: ("rainbow"),
-                            value: "rainbow",
+                            value: "rainbow"
                         },
                         {
                             text: ("zoom"),
-                            value: "zoom",
-                        },
-                    ],
+                            value: "zoom"
+                        }
+                    ]
                 },
                 twAlign: {
                     acceptReporters: true,
                     items: [
                         {
                             text: ("left"),
-                            value: "left",
+                            value: "left"
                         },
                         {
                             text: ("center"),
-                            value: "center",
+                            value: "center"
                         },
                         {
                             text: ("right"),
-                            value: "right",
-                        },
-                    ],
-                },
+                            value: "right"
+                        }
+                    ]
+                }
             }
         };
     }
@@ -665,28 +668,45 @@ class Scratch3TextBlocks {
         this._renderText(util.target);
     }
 
+    textActive (args, util) {
+        return this.getVisible(args, util);
+    }
+
     getVisible (args, util) {
         const textState = this._getTextState(util.target);
 
         return textState.visible;
     }
 
+    getDisplayedText(args, util) {
+        const textState = this._getTextState(util.target);
+
+        return textState.text;
+    }
+
+    getRender(args, util) {
+        const textSkin = this._getTextSkin(util.target);
+        if (!textSkin) return;
+
+        return textSkin._canvas.toDataURL();
+    }
+
     getWidth (args, util) {
         const textSkin = this._getTextSkin(util.target);
-        if (typeof textSkin.width !== 'number') return 0;
+        if (!textSkin) return 0;
         return textSkin.width;
     }
 
     getHeight (args, util) {
         const textSkin = this._getTextSkin(util.target);
-        if (typeof textSkin.height !== 'number') return 0;
+        if (!textSkin) return 0;
         return textSkin.height;
     }
 
     _getTextSkin (target) {
         const textState = this._getTextState(target);
-        if (!textState) return [0,0];
-        if (!textState.skinId) return [0,0];
+        if (!textState) return;
+        if (!textState.skinId) return;
         const textSkin = this.runtime.renderer._allSkins[textState.skinId];
 
         return textSkin;
