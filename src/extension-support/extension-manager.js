@@ -136,6 +136,8 @@ const defaultBuiltinExtensions = {
     jwReflex: () => require("../extensions/jw_reflex"),
     // Blockly 2: a faithful recreation of the original blockly blocks
     blockly2math: () => require("../extensions/blockly-2/math.js"),
+    // jwXml: hi im back haha have funny xml
+    jwXml: () => require("../extensions/jw_xml"),
 
     // jw: They'll think its made by jwklong >:)
     // (but it's not (yet (maybe (probably not (but its made by ianyourgod)))))
