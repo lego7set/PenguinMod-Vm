@@ -27,16 +27,14 @@ class JgRuntimeBlocks {
         // Based on from https://www.growingwiththeweb.com/2017/12/fast-simple-js-fps-counter.html
         const times = [];
         fps = this.runtime.frameLoop.framerate;
-        const oldStep = this.runtime._step;
-        this.runtime._step = function (...args) {
-            oldStep.call(this, ...args);
+        this.runtime.on('RUNTIME_STEP_START', () => {
             const now = performance.now();
             while (times.length > 0 && times[0] <= now - 1000) {
                 times.shift();
             }
             times.push(now);
             fps = times.length;
-        };
+        });
         this.runtime.on('PROJECT_STOP_ALL', () => {
             this.pausedScripts = Object.create({});
         });
