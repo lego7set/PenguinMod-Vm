@@ -167,7 +167,7 @@ class jgJavascript {
             return (async () => {
                 const value = await possiblePromise;
                 return Boolean(value); // this is a JavaScript extension, we should use the JavaScript way of determining booleans
-            });
+            })();
         }
         return Boolean(possiblePromise);
     }
