@@ -1626,13 +1626,13 @@ class Runtime extends EventEmitter {
                 blockJSON.checkboxInFlyout = true;
             }
         }
-        if (blockInfo.blockType === BlockType.LOOP || blockInfo.branchIndicator || blockInfo.branchIconURI) {
+        if (blockInfo.blockType === BlockType.LOOP || (blockInfo.branchIndicator ?? blockInfo.branchIconURI)) {
             // Add icon to the bottom right of a loop block
             blockJSON[`lastDummyAlign${outLineNum}`] = 'RIGHT';
             blockJSON[`message${outLineNum}`] = '%1';
             blockJSON[`args${outLineNum}`] = [{
                 type: 'field_image',
-                src: blockInfo.branchIndicator || blockInfo.branchIconURI || './static/blocks-media/repeat.svg',
+                src: blockInfo.branchIndicator ?? blockInfo.branchIconURI ?? './static/blocks-media/repeat.svg',
                 width: 24,
                 height: 24,
                 alt: '*', // TODO remove this since we don't use collapsed blocks in scratch
