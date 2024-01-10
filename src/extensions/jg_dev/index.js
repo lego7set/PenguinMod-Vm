@@ -274,6 +274,15 @@ class JgDevBlocks {
                     forceOutputType: 'Boolean',
                     disableMonitor: true
                 },
+                {
+                    opcode: 'green',
+                    text: 'im literally just green',
+                    blockType: BlockType.REPORTER,
+                    color1: '#00ff00',
+                    color2: '#000000',
+                    color3: '#000000',
+                    disableMonitor: true
+                },
             ],
             menus: {
                 variable: "getVariablesMenu",
@@ -466,6 +475,10 @@ class JgDevBlocks {
         if (!soundBank) return;
 
         soundBank.soundPlayers[soundId].stopFadeDecay = Cast.toNumber(args.SEX);
+    }
+
+    green() {
+        return 'g';
     }
 
     logArgs1(args) {
