@@ -1,9 +1,10 @@
+/* eslint-disable no-undef */
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
-const Color = require('../../util/color');
-const cstore = require('./canvasStorage');
-const Cast = require('../../util/cast');
-const store = new cstore();
+const CanvasVar = require('./canvasData');
+const uid = require('../../util/uid');
+
+const DefaultDrawImage = 'https://studio.penguinmod.com/favicon.ico'; 
 
 /**
  * Class
@@ -16,67 +17,85 @@ class canvas {
          * @type {runtime}
          */
         this.runtime = runtime;
-        store.attachRuntime(runtime);
+        this.lastVars = [];
+        this.preloadedImages = {};
+
+        const changeOnVarChange = type => {
+            if (type === 'canvas') {
+                this.runtime.vm.emitWorkspaceUpdate();
+            }
+        };
+        this.runtime.on('variableChange', changeOnVarChange);
+        this.runtime.on('variableDelete', changeOnVarChange);
     }
 
-    static get canvasStorageHeader() {
-        return 'canvases: ';
+    createVariable(target, id, name, img) {
+        id ??= uid();
+        target ??= this.runtime.getTargetForStage();
+        if (target.variables[id]) return;
+        const cnvs = new CanvasVar(this.runtime, id, name, img);
+        target.variables[id] = cnvs;
+        return cnvs;
+    }
+
+    getOrCreateVariable(target, id, name) {
+        const variable = target.lookupVariableById(id);
+        if (variable) return variable;
+        return this.createVariable(id, name);
     }
 
     deserialize(data) {
-        store.canvases = {};
-        for (const canvas of data) {
-            store.newCanvas(canvas.name, canvas.width, canvas.height, canvas.id);
+        for (const variable of data) {
+            const targetId = data.pop();
+            const target = this.runtime.getTargetById(targetId);
+            this.createVariable(target, ...variable);
         }
     }
 
     serialize() {
-        return store.getAllCanvases()
-            .map(variable => ({
-                name: variable.name,
-                width: variable.width,
-                height: variable.height,
-                id: variable.id
-            }));
-    }
-
-    readAsImageElement(src) {
-        return new Promise((resolve, reject) => {
-            const image = new Image();
-            image.onload = function () {
-                resolve(image);
-                image.onload = null;
-                image.onerror = null;
-            };
-            image.onerror = function () {
-                reject(new Error('Costume load failed. Asset could not be read.'));
-                image.onload = null;
-                image.onerror = null;
-            };
-            image.src = src;
-        });
+        const vars = [];
+        for (const target of this.runtime.targets) {
+            for (const varId in target.variables) {
+                const variable = target.variables[varId];
+                const varJSON = variable.serialize();
+                varJSON.push(target.id);
+                vars.push(varJSON);
+            }
+        }
+        return vars;
     }
 
     orderCategoryBlocks(blocks) {
         const button = blocks[0];
         const varBlock = blocks[1];
+        const variables = [button];
         delete blocks[0];
         delete blocks[1];
-        // create the variable block xml's
-        const varBlocks = store.getAllCanvases().map(canvas => varBlock
-            .replace('{canvasId}', canvas.id));
-        if (!varBlocks.length) {
-            return [button];
+
+        const stage = this.runtime.getTargetForStage();
+        const target = this.runtime.vm.editingTarget;
+        const stageVars = Object.values(stage.variables)
+            .filter(variable => variable.type === 'canvas')
+            .map(variable => variable.toToolboxDefault('canvas'))
+            .map(xml => varBlock.replace('></block>', `>${xml}</block>`));
+        const privateVars = Object.values(target.variables)
+            .filter(variable => variable.type === 'canvas')
+            .map(variable => variable.toToolboxDefault('canvas'))
+            .map(xml => varBlock.replace('></block>', `>${xml}</block>`));
+        
+        if (stageVars.length) {
+            variables.push(`<label text="Canvases for all sprites"></label>`);
+            variables.push(...stageVars);
         }
-        // push the button to the top of the var list
-        varBlocks
-            .reverse()
-            .push(button);
-        // merge the category blocks and variable blocks into one block list
-        blocks = varBlocks
-            .reverse()
-            .concat(blocks);
-        return blocks;
+        if (privateVars.length) {
+            variables.push(`<label text="Canvases for this sprite"></label>`);
+            variables.push(...privateVars);
+        }
+        if (stageVars.length || privateVars.length) {
+            variables.push(...blocks);
+        }
+
+        return variables;
     }
 
     /**
@@ -84,13 +103,13 @@ class canvas {
      */
     getInfo() {
         return {
-            id: 'canvas',
+            id: 'newCanvas',
             name: 'html canvas',
             color1: '#0069c2',
             color2: '#0060B4',
             color3: '#0060B4',
             isDynamic: true,
-            orderBlocks: this.orderCategoryBlocks,
+            orderBlocks: this.orderCategoryBlocks.bind(this),
             blocks: [
                 {
                     opcode: 'createNewCanvas',
@@ -100,11 +119,11 @@ class canvas {
                 {
                     opcode: 'canvasGetter',
                     blockType: BlockType.REPORTER,
+                    disableMonitor: true,
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas',
-                            defaultValue: '{canvasId}'
+                            menu: 'canvas'
                         }
                     },
                     text: '[canvas]'
@@ -119,13 +138,11 @@ class canvas {
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas',
-                            defaultValue: ""
+                            menu: 'canvas'
                         },
                         CompositeOperation: {
                             type: ArgumentType.STRING,
-                            menu: 'CompositeOperation',
-                            defaultValue: ""
+                            menu: 'CompositeOperation'
                         }
                     },
                     blockType: BlockType.COMMAND
@@ -136,8 +153,7 @@ class canvas {
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas',
-                            defaultValue: ""
+                            menu: 'canvas'
                         },
                         width: {
                             type: ArgumentType.NUMBER,
@@ -156,8 +172,7 @@ class canvas {
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas',
-                            defaultValue: ""
+                            menu: 'canvas'
                         },
                         transparency: {
                             type: ArgumentType.NUMBER,
@@ -172,8 +187,7 @@ class canvas {
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas',
-                            defaultValue: ""
+                            menu: 'canvas'
                         },
                         color: {
                             type: ArgumentType.COLOR
@@ -183,15 +197,29 @@ class canvas {
                 },
                 {
                     opcode: 'setBorderColor',
-                    text: 'set border color of [canvas] to [color]',
+                    text: 'set line color of [canvas] to [color]',
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas',
-                            defaultValue: ""
+                            menu: 'canvas'
                         },
                         color: {
                             type: ArgumentType.COLOR
+                        }
+                    },
+                    blockType: BlockType.COMMAND
+                },
+                {
+                    opcode: 'setBorderSize',
+                    text: 'set line size of [canvas] to [size]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        },
+                        size: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '1'
                         }
                     },
                     blockType: BlockType.COMMAND
@@ -206,8 +234,7 @@ class canvas {
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas',
-                            defaultValue: ""
+                            menu: 'canvas'
                         }
                     },
                     blockType: BlockType.COMMAND
@@ -218,8 +245,7 @@ class canvas {
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas',
-                            defaultValue: ""
+                            menu: 'canvas'
                         },
                         x: {
                             type: ArgumentType.NUMBER,
@@ -247,8 +273,7 @@ class canvas {
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas',
-                            defaultValue: ""
+                            menu: 'canvas'
                         },
                         x: {
                             type: ArgumentType.NUMBER,
@@ -270,32 +295,149 @@ class canvas {
                     blockType: BlockType.COMMAND
                 },
                 {
-                    opcode: 'drawImage',
-                    text: 'draw image [src] at x: [x] y: [y] on [canvas]',
+                    opcode: 'preloadUriImage',
+                    blockType: BlockType.COMMAND,
+                    text: 'preload image [URI] as [NAME]',
+                    arguments: {
+                        URI: {
+                            type: ArgumentType.STRING,
+                            exemptFromNormalization: true,
+                            defaultValue: DefaultDrawImage
+                        },
+                        NAME: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "preloaded image"
+                        }
+                    }
+                },
+                {
+                    opcode: 'unloadUriImage',
+                    blockType: BlockType.COMMAND,
+                    text: 'unload image [NAME]',
+                    arguments: {
+                        NAME: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "preloaded image"
+                        }
+                    }
+                },
+                {
+                    opcode: 'drawUriImage',
+                    blockType: BlockType.COMMAND,
+                    text: 'draw image [URI] at x:[X] y:[Y] onto canvas [canvas]',
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas',
-                            defaultValue: ""
+                            menu: 'canvas'
                         },
-                        x: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: '0'
-                        },
-                        y: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: '0'
-                        },
-                        src: {
+                        URI: {
                             type: ArgumentType.STRING,
-                            defaultValue: 'https://studio.penguinmod.com/favicon.ico'
+                            exemptFromNormalization: true,
+                            defaultValue: DefaultDrawImage
+                        },
+                        X: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        Y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
                         }
-                    },
-                    blockType: BlockType.COMMAND
+                    }
+                },
+                {
+                    opcode: 'drawUriImageWHR',
+                    blockType: BlockType.COMMAND,
+                    text: 'draw image [URI] at x:[X] y:[Y] width:[WIDTH] height:[HEIGHT] pointed at: [ROTATE] onto canvas [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        },
+                        URI: {
+                            type: ArgumentType.STRING,
+                            exemptFromNormalization: true,
+                            defaultValue: DefaultDrawImage
+                        },
+                        X: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        Y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        WIDTH: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 64
+                        },
+                        HEIGHT: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 64
+                        },
+                        ROTATE: {
+                            type: ArgumentType.ANGLE,
+                            defaultValue: 90
+                        }
+                    }
+                },
+                {
+                    opcode: 'drawUriImageWHCX1Y1X2Y2R',
+                    blockType: BlockType.COMMAND,
+                    text: 'draw image [URI] at x:[X] y:[Y] width:[WIDTH] height:[HEIGHT] cropping from x:[CROPX] y:[CROPY] width:[CROPW] height:[CROPH] pointed at: [ROTATE] onto canvas [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        },
+                        URI: {
+                            type: ArgumentType.STRING,
+                            exemptFromNormalization: true,
+                            defaultValue: DefaultDrawImage
+                        },
+                        X: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        Y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        WIDTH: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 64
+                        },
+                        HEIGHT: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 64
+                        },
+                        CROPX: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        CROPY: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 0
+                        },
+                        CROPW: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 100
+                        },
+                        CROPH: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 100
+                        },
+                        ROTATE: {
+                            type: ArgumentType.ANGLE,
+                            defaultValue: 90
+                        }
+                    }
                 }
             ],
             menus: {
-                canvas: 'getCanvasMenuItems',
+                canvas: {
+                    variableType: 'canvas'
+                },
                 CompositeOperation: {
                     items: [
                         {
@@ -409,83 +551,156 @@ class canvas {
     }
 
     createNewCanvas() {
-        const newCanvas = prompt('canvas name?', 'newCanvas');
-        // if this camvas already exists, remove it to minimize confusion
-        if (!newCanvas) return alert('Canceled')
-        if (store.getCanvasByName(newCanvas)) return;
-        store.newCanvas(newCanvas);
-        vm.emitWorkspaceUpdate();
-        this.serialize();
+        // expect the global ScratchBlocks from inside the window
+        ScratchBlocks.prompt(ScratchBlocks.Msg.NEW_VARIABLE_TITLE, '', 
+            (name, additionalVars, {scope}) => {
+                name = ScratchBlocks.Variables.validateScalarVarOrListName_(name, 
+                    ScratchBlocks.getMainWorkspace(), additionalVars, false, 
+                    'canvas', ScratchBlocks.Msg.VARIABLE_ALREADY_EXISTS);
+                if (!name) return;
+
+                const target = scope
+                    ? this.runtime.vm.editingTarget
+                    : this.runtime.getTargetForStage();
+                this.createVariable(target, null, name);
+                this.runtime.vm.emitWorkspaceUpdate();
+            }, ScratchBlocks.Msg.VARIABLE_MODAL_TITLE, 'canvas');
     }
 
-    getCanvasMenuItems() {
-        const canvases = store.getAllCanvases();
-        if (canvases.length < 1) return [{ text: '', value: '' }];
-        return canvases.map(canvas => ({
-            text: canvas.name,
-            value: canvas.id
-        }));
+    canvasGetter(args, util) {
+        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
+        return canvasObj;
     }
 
-    canvasGetter(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        return canvasObj.element.toDataURL();
+    setGlobalCompositeOperation(args, util) {
+        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
+        const ctx = canvasObj.canvas.getContext('2d');
+        ctx.globalCompositeOperation = args.CompositeOperation;
     }
 
-    setGlobalCompositeOperation(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.globalCompositeOperation = args.CompositeOperation;
+    setBorderColor(args, util) {
+        const color = args.color;
+        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
+        const ctx = canvasObj.canvas.getContext('2d');
+        ctx.strokeStyle = color;
     }
 
-    setBorderColor(args) {
-        const color = Cast.toString(args.color);
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.strokeStyle = color;
+    setBorderSize(args, util) {
+        const size = args.size;
+        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
+        const ctx = canvasObj.canvas.getContext('2d');
+        ctx.lineSize = size;
     }
 
-    setFill(args) {
-        const color = Cast.toString(args.color);
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.fillStyle = color;
+    setFill(args, util) {
+        const color = args.color;
+        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
+        const ctx = canvasObj.canvas.getContext('2d');
+        ctx.fillStyle = color;
     }
 
-    setSize(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.element.width = args.width;
-        canvasObj.element.height = args.height;
-        canvasObj.context = canvasObj.element.getContext('2d');
+    setSize(args, util) {
+        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
+        canvasObj.size = [args.width, args.height];
     }
 
-    drawRect(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.fillRect(args.x, args.y, args.width, args.height);
+    drawRect(args, util) {
+        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
+        const ctx = canvasObj.canvas.getContext('2d');
+        ctx.fillRect(args.x, args.y, args.width, args.height);
     }
 
-    drawImage(args) {
+    async _drawUriImage({canvas, URI, X, Y, WIDTH, HEIGHT, ROTATE, CROPX, CROPY, CROPW, CROPH}, target) {
+        const canvasObj = this.getOrCreateVariable(target, canvas.id, canvas.name);
+        const image = this.preloadedImages[URI] ?? (URI instanceof CanvasVar
+            ? URI.canvas
+            : await new Promise((resolve, reject) => {
+                const image = new Image();
+                image.onload = () => resolve(image);
+                image.onerror = err => reject(err);
+                image.src = URI;
+            }));
+        const ctx = canvasObj.canvas.getContext('2d');
+        ctx.rotate(MathUtil.degToRad(ROTATE - 90));
+
+        // use sizes from the image if none specified
+        const width = (WIDTH ?? image.width) * this._penRes;
+        const height = (HEIGHT ?? image.height) * this._penRes;
+        const realX = (X * this._penRes) - (width / 2);
+        const realY = (-Y * this._penRes) - (height / 2);
+        const drawArgs = [CROPX, CROPY, CROPW, CROPH, realX, realY, width, height];
+
+        // if cropx or cropy are undefined then remove the crop args
+        if (typeof (CROPX ?? CROPY) === "undefined") {
+            drawArgs.splice(0, 4);
+        }
+
+        ctx.drawImage(image, ...drawArgs);
+    }
+
+    // todo: should these be merged into their own function? they all have the same code...
+    drawUriImage (args, util) {
+        const preloaded = this.preloadedImages[args.URI];
+        const possiblePromise = this._drawUriImage(args, util.target);
+        if (!preloaded && !(args.URI instanceof CanvasVar)) {
+            return possiblePromise;
+        }
+    }
+    drawUriImageWHR (args, util) {
+        const preloaded = this.preloadedImages[args.URI];
+        const possiblePromise = this._drawUriImage(args, util.target);
+        if (!preloaded && !(args.URI instanceof CanvasVar)) {
+            return possiblePromise;
+        }
+    }
+    drawUriImageWHCX1Y1X2Y2R (args, util) {
+        const preloaded = this.preloadedImages[args.URI];
+        const possiblePromise = this._drawUriImage(args, util.target);
+        if (!preloaded && !(args.URI instanceof CanvasVar)) {
+            return possiblePromise;
+        }
+    }
+
+    preloadUriImage ({ URI, NAME }) {
+        // just incase the user tries to preload a canvas, dont use the canvases data uri
+        if (URI instanceof CanvasVar) {
+            this.preloadedImages[NAME] = URI.canvas;
+            return;
+        }
         return new Promise(resolve => {
-            const canvasObj = store.getCanvas(args.canvas);
             const image = new Image();
+            image.crossOrigin = "anonymous";
             image.onload = () => {
-                canvasObj.context.drawImage(image, args.x, args.y);
+                this.preloadedImages[NAME] = image;
                 resolve();
             };
-            image.src = args.src;
+            image.onerror = resolve; // ignore loading errors lol!
+            image.src = URI;
         });
     }
-
-    clearAria(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.clearRect(args.x, args.y, args.width, args.height);
+    unloadUriImage ({ NAME }) {
+        if (this.preloadedImages.hasOwnProperty(NAME)) {
+            this.preloadedImages[NAME].remove();
+            delete this.preloadedImages[NAME];
+        }
     }
 
-    clearCanvas(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.clearRect(0, 0, canvasObj.width, canvasObj.height);
+    clearAria(args, util) {
+        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
+        const ctx = canvasObj.canvas.getContext('2d');
+        ctx.clearRect(args.x, args.y, args.width, args.height);
     }
 
-    setTransparency(args) {
-        const canvasObj = store.getCanvas(args.canvas);
-        canvasObj.context.globalAlpha = args.transparency / 100;
+    clearCanvas(args, util) {
+        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
+        const ctx = canvasObj.canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvasObj.size[0], canvasObj.size[1]);
+    }
+
+    setTransparency(args, util) {
+        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
+        const ctx = canvasObj.canvas.getContext('2d');
+        ctx.globalAlpha = args.transparency / 100;
     }
 }
 

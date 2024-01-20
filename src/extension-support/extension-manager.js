@@ -163,7 +163,9 @@ const defaultBuiltinExtensions = {
     // gsa: fill out your introduction stupet!!!
     // no >:(
     // canvas: kinda obvius if you know anything about html canvases
-    canvas: () => require('../extensions/gsa_canvas'),
+    canvas: () => require('../extensions/gsa_canvas_old'),
+    // the replacment for the above extension
+    newCanvas: () => require('../extensions/gsa_canvas'),
     // tempVars: fill out your introduction stupet!!!
     tempVars: () => require('../extensions/gsa_tempVars'),
     // colors: fill out your introduction stupet!!!
@@ -631,6 +633,8 @@ class ExtensionManager {
         extensionInfo.name = extensionInfo.name || extensionInfo.id;
         extensionInfo.blocks = extensionInfo.blocks || [];
         extensionInfo.targetTypes = extensionInfo.targetTypes || [];
+        extensionInfo.menus = extensionInfo.menus || {};
+        extensionInfo.menus = this._prepareMenuInfo(serviceName, extensionInfo.menus);
         extensionInfo.blocks = extensionInfo.blocks.reduce((results, blockInfo) => {
             try {
                 let result;
@@ -639,7 +643,7 @@ class ExtensionManager {
                     result = '---';
                     break;
                 default: // an ExtensionBlockMetadata object
-                    result = this._prepareBlockInfo(serviceName, blockInfo);
+                    result = this._prepareBlockInfo(serviceName, blockInfo, extensionInfo.menus);
                     break;
                 }
                 results.push(result);
@@ -649,8 +653,6 @@ class ExtensionManager {
             }
             return results;
         }, []);
-        extensionInfo.menus = extensionInfo.menus || {};
-        extensionInfo.menus = this._prepareMenuInfo(serviceName, extensionInfo.menus);
         return extensionInfo;
     }
 
@@ -669,7 +671,7 @@ class ExtensionManager {
 
             // If the menu description is in short form (items only) then normalize it to general form: an object with
             // its items listed in an `items` property.
-            if (!menuInfo.items) {
+            if (!menuInfo.items && (typeof menuInfo.variableType !== 'string')) {
                 menuInfo = {
                     items: menuInfo
                 };
@@ -743,7 +745,7 @@ class ExtensionManager {
      * @returns {ExtensionBlockMetadata} - a new block info object which has values for all relevant optional fields.
      * @private
      */
-    _prepareBlockInfo(serviceName, blockInfo) {
+    _prepareBlockInfo(serviceName, blockInfo, menus) {
         if (blockInfo.blockType === BlockType.XML) {
             blockInfo = Object.assign({}, blockInfo);
             blockInfo.xml = String(blockInfo.xml) || '';
@@ -848,6 +850,10 @@ class ExtensionManager {
                     if (realBlockInfo.arguments[arg].exemptFromNormalization === true) continue;
                     if (expected === 'exception') continue;
                     if (!expected) continue;
+                    // stupidly long check but :Trollhands
+                    // if this argument is for a variable dropdown, do not type cast it
+                    // as variable dropdowns report an object and not something we can or should cast
+                    if (typeof menus[realBlockInfo.arguments[arg].menu]?.variableType === 'string') continue;
                     if (!(typeof args[arg] === expected)) args[arg] = this._normalize(args[arg], expected);
                 }
                 // TODO: filter args using the keys of realBlockInfo.arguments? maybe only if sandboxed?

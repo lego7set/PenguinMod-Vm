@@ -492,6 +492,7 @@ class Blocks {
                     }
                 }
                 stage.createVariable(e.varId, e.varName, e.varType, e.isCloud);
+                this.runtime.emit('variableCreate', e.varType, e.varId, e.varName, e.isCloud);
                 this.emitProjectChanged();
             }
             break;
@@ -512,12 +513,14 @@ class Blocks {
                     currTarget.blocks.updateBlocksAfterVarRename(e.varId, e.newName);
                 }
             }
+            this.runtime.emit('variableChange', e.varType, e.varId, e.varName);
             this.emitProjectChanged();
             break;
         case 'var_delete': {
             this.resetCache(); // tw: more aggressive cache resetting
             const target = (editingTarget && editingTarget.variables.hasOwnProperty(e.varId)) ?
                 editingTarget : stage;
+            this.runtime.emit('variableDelete', e.varType, e.varId);
             target.deleteVariable(e.varId);
             this.emitProjectChanged();
             break;

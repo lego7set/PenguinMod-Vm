@@ -1846,22 +1846,7 @@ class JSGenerator {
         for (const fieldName of Object.keys(node.fields)) {
             const field = node.fields[fieldName];
             if (typeof field !== 'string') {
-                let variable;
-                // log.log(field)
-                switch (field.type) {
-                case 'broadcast_msg':
-                    variable = JSON.stringify(field);
-                    break;
-                case 'list':
-                    variable = this.referenceVariable(field);
-                    break;
-                case '':
-                    variable = this.descendVariable(field).source;
-                    break;
-                }
-                // console.log(this.descendVariable(field))
-                result += `"${sanitize(fieldName)}":${variable},`;
-                // result += `"_field_${sanitize(fieldName)}":${JSON.stringify(field)},`;
+                result += `"${sanitize(fieldName)}":${JSON.stringify(field)},`;
                 continue;
             }
             result += `"${sanitize(fieldName)}":"${sanitize(field)}",`;

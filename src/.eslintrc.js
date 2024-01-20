@@ -5,7 +5,6 @@ module.exports = {
         browser: true
     },
     rules: {
-        'valid-jsdoc': 'off',
         'no-case-declarations': 'off',
         'no-console': 'off',
         'no-shadow': 'off',

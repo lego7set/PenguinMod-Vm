@@ -274,8 +274,21 @@ class JgDevBlocks {
                     forceOutputType: 'Boolean',
                     disableMonitor: true
                 },
+                {
+                    opcode: 'varvarvavvarvarvar',
+                    text: 'varibles!?!?!??!?!?!?!?!!!?!?! [variable]',
+                    arguments: {
+                        variable: {
+                            menu: 'variableInternal'
+                        }
+                    },
+                    blockType: BlockType.REPORTER
+                }
             ],
             menus: {
+                variableInternal: {
+                    variableType: 'scalar'
+                },
                 variable: "getVariablesMenu",
                 numericTypeableTest: {
                     items: [
@@ -349,6 +362,10 @@ class JgDevBlocks {
                 }
             }
         };
+    }
+
+    varvarvavvarvarvar(args) {
+        return JSON.stringify(args);
     }
 
     // menu

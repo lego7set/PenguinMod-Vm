@@ -1350,7 +1350,7 @@ class Runtime extends EventEmitter {
      * @private
      */
     _convertMenuItems (menuItems) {
-        if (typeof menuItems !== 'function') {
+        if (Array.isArray(menuItems)) {
             const extensionMessageContext = this.makeMessageContextForTarget();
             return menuItems.map(item => {
                 const formattedItem = maybeFormatMessage(item, extensionMessageContext);
@@ -1400,11 +1400,11 @@ class Runtime extends EventEmitter {
                 args0: [
                     (typeof menuInfo.variableType === 'string' ? 
                         {
-                            type: 'field_variable_getter',
+                            type: 'field_variable',
                             name: menuName,
-                            variableType: menuInfo.variableType === 'scalar' 
+                            variableTypes: [menuInfo.variableType === 'scalar' 
                                 ? '' 
-                                : menuInfo.variableType
+                                : menuInfo.variableType]
                         } : (menuInfo.isTypeable ? 
                             {
                                 type: menuInfo.isNumeric 
@@ -1824,6 +1824,8 @@ class Runtime extends EventEmitter {
             let valueName;
             let shadowType;
             let fieldName;
+            let variableID;
+            let variableName;
             if (argInfo.menu) {
                 const menuInfo = context.categoryInfo.menuInfo[argInfo.menu];
                 if (menuInfo.acceptReporters || menuInfo.isTypeable) {
@@ -1831,13 +1833,24 @@ class Runtime extends EventEmitter {
                     shadowType = this._makeExtensionMenuId(argInfo.menu, context.categoryInfo.id);
                     fieldName = argInfo.menu;
                 } else if (typeof menuInfo.variableType === 'string') {
-                    argJSON.type = 'field_variable';
+                    const args = Object.keys(context.blockInfo.arguments);
+                    const blockText = context.blockInfo.text.toString();
+                    const isVariableGetter = args.length === 1 && blockText.length === args[0].length + 2
+                    context.blockJSON.extensions ??= [];
+                    context.blockJSON.extensions.push('contextMenu_getVariableBlockAnyType');
+                    argJSON.type = isVariableGetter
+                        ? 'field_variable_getter'
+                        : 'field_variable';
                     argJSON.variableTypes = [menuInfo.variableType === 'scalar' 
                         ? '' 
                         : menuInfo.variableType];
+                    argJSON.variableType = argJSON.variableTypes[0];
                     valueName = null;
                     shadowType = null;
                     fieldName = placeholder;
+                    const defaultVar = argInfo.defaultValue ?? [];
+                    variableID = defaultVar[0];
+                    variableName = defaultVar[1];
                 } else {
                     argJSON.type = 'field_dropdown';
                     argJSON.options = this._convertMenuItems(menuInfo.items);
@@ -1874,10 +1887,15 @@ class Runtime extends EventEmitter {
 
             // A <field> displays a dynamic value: a user-editable text field, a drop-down menu, etc.
             // Leave out the field if defaultValue or fieldName are not specified
-            if (fieldName) {
+            if (fieldName && !variableID) {
                 if ((defaultValue) || ((argInfo.type === "string") && (!argInfo.menu))) {
                     context.inputList.push(`<field name="${fieldName}">${defaultValue}</field>`);
                 }
+            }
+
+            if (variableID) {
+                // eslint-disable-next-line max-len
+                context.inputList.push(`<field name="${fieldName}" id="${variableID}" variableType="${argInfo.variableType}">${variableName}</field>`);
             }
 
             if (shadowType) {
@@ -3304,7 +3322,7 @@ class Runtime extends EventEmitter {
      * @param {string} value Value to show associated with the block.
      */
     visualReport (blockId, value) {
-        this.emit(Runtime.VISUAL_REPORT, {id: blockId, value: String(value)});
+        this.emit(Runtime.VISUAL_REPORT, {id: blockId, value});
     }
 
     /**

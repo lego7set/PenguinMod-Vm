@@ -1977,7 +1977,6 @@ class ScriptTreeGenerator {
             const type = block.fields[name].variableType;
             if (typeof type !== 'undefined') {
                 const data = this.descendVariable(block, name, type);
-                data.type = type;
                 fields[name] = data;
                 continue;
             }
