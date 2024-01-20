@@ -829,7 +829,7 @@ class ExtensionManager {
                     serviceObject[funcName](args, util, realBlockInfo);
             })();
 
-            blockInfo.func = (args, util) => {
+            blockInfo.func = (args, util, visualReport) => {
                 const normal = {
                     'angle': "number",
                     'Boolean': "boolean",
@@ -857,7 +857,9 @@ class ExtensionManager {
                     if (!(typeof args[arg] === expected)) args[arg] = this._normalize(args[arg], expected);
                 }
                 // TODO: filter args using the keys of realBlockInfo.arguments? maybe only if sandboxed?
-                return callBlockFunc(args, util, realBlockInfo);
+                const returnValue = callBlockFunc(args, util, realBlockInfo);
+                if (!visualReport && (returnValue?.value ?? false)) return returnValue.value;
+                return returnValue;
             };
             break;
         }

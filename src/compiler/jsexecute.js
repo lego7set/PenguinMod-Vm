@@ -147,7 +147,7 @@ const isPromise = value => (
     typeof value === 'object' &&
     typeof value.then === 'function'
 );
-const executeInCompatibilityLayer = function*(inputs, blockFunction, isWarp, useFlags, blockId, branchInfo) {
+const executeInCompatibilityLayer = function*(inputs, blockFunction, isWarp, useFlags, blockId, branchInfo, visualReport) {
     const thread = globalState.thread;
     const blockUtility = globalState.blockUtility;
     const stackFrame = branchInfo ? branchInfo.stackFrame : {};
@@ -169,7 +169,7 @@ const executeInCompatibilityLayer = function*(inputs, blockFunction, isWarp, use
 
     const executeBlock = () => {
         blockUtility.init(thread, blockId, stackFrame);
-        return blockFunction(inputs, blockUtility);
+        return blockFunction(inputs, blockUtility, visualReport);
     };
 
     let returnValue = executeBlock();

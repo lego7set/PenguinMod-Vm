@@ -506,7 +506,7 @@ class JSGenerator {
      * @param {object} node Input node to compile.
      * @returns {Input} Compiled input.
      */
-    descendInput (node) {
+    descendInput (node, visualReport = false) {
         // check if we have extension js for this kind
         const extensionId = String(node.kind).split('.')[0];
         const blockId = String(node.kind).replace(extensionId + '.', '');
@@ -534,7 +534,7 @@ class JSGenerator {
         case 'compat':
             // Compatibility layer inputs never use flags.
             // log.log('compat')
-            return new TypedInput(`(${this.generateCompatibilityLayerCall(node, false)})`, TYPE_UNKNOWN);
+            return new TypedInput(`(${this.generateCompatibilityLayerCall(node, false, null, visualReport)})`, TYPE_UNKNOWN);
 
         case 'constant':
             return this.safeConstantInput(node.value);
@@ -1605,7 +1605,7 @@ class JSGenerator {
 
         case 'visualReport': {
             const value = this.localVariables.next();
-            this.source += `const ${value} = ${this.descendInput(node.input).asUnknown()};`;
+            this.source += `const ${value} = ${this.descendInput(node.input, true).asUnknown()};`;
             // blocks like legacy no-ops can return a literal `undefined`
             this.source += `if (${value} !== undefined) runtime.visualReport("${sanitize(this.script.topBlockId)}", ${value});\n`;
             break;
@@ -1827,7 +1827,7 @@ class JSGenerator {
      * @param {string|null} [frameName] Name of the stack frame variable, if any
      * @returns {string} The JS of the call.
      */
-    generateCompatibilityLayerCall (node, setFlags, frameName = null) {
+    generateCompatibilityLayerCall (node, setFlags, frameName = null, visualReport) {
         const opcode = node.opcode;
 
         let result = 'yield* executeInCompatibilityLayer({';
@@ -1853,7 +1853,7 @@ class JSGenerator {
         }
         result += `"mutation":${JSON.stringify(node.mutation)},`;
         const opcodeFunction = this.evaluateOnce(`runtime.getOpcodeFunction("${sanitize(opcode)}")`);
-        result += `}, ${opcodeFunction}, ${this.isWarp}, ${setFlags}, "${sanitize(node.id)}", ${frameName})`;
+        result += `}, ${opcodeFunction}, ${this.isWarp}, ${setFlags}, "${sanitize(node.id)}", ${frameName}, ${visualReport})`;
 
         return result;
     }
