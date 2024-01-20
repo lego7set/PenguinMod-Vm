@@ -129,7 +129,7 @@ class jgJavascript {
     }
 
     // util
-    evaluateCode(code) {
+    evaluateCode(code, args, util, realBlockInfo) {
         // used for packager
         if (this.runtime.extensionRuntimeOptions.javascriptUnsandboxed === true || this.runningEditorUnsandboxed) {
             let result;
@@ -152,22 +152,22 @@ class jgJavascript {
     }
 
     // blocks
-    javascriptStack(args) {
+    javascriptStack(args, util, realBlockInfo) {
         const code = Cast.toString(args.CODE);
-        return this.evaluateCode(code);
+        return this.evaluateCode(code, args, util, realBlockInfo);
     }
-    javascriptString(args) {
+    javascriptString(args, util, realBlockInfo) {
         const code = Cast.toString(args.CODE);
-        return this.evaluateCode(code);
+        return this.evaluateCode(code, args, util, realBlockInfo);
     }
-    javascriptBool(args) {
+    javascriptBool(args, util, realBlockInfo) {
         const code = Cast.toString(args.CODE);
-        const possiblePromise = this.evaluateCode(code);
+        const possiblePromise = this.evaluateCode(code, args, util, realBlockInfo);
         if (possiblePromise && typeof possiblePromise.then === 'function') {
             return (async () => {
                 const value = await possiblePromise;
                 return Boolean(value); // this is a JavaScript extension, we should use the JavaScript way of determining booleans
-            });
+            })();
         }
         return Boolean(possiblePromise);
     }

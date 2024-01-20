@@ -31,6 +31,8 @@ class Touch {
     postData (data) {
         data.changedTouches.forEach(touch => {
             const finger = this.fingers[touch.identifier];
+            console.log(touch, finger);
+            if (!finger) return;
             if (typeof touch.x === 'number') {
                 finger._clientX = touch.x;
                 finger._scratchX = MathUtil.clamp(
