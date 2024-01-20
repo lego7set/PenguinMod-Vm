@@ -504,6 +504,7 @@ class JSGenerator {
 
     /**
      * @param {object} node Input node to compile.
+     * @param {boolean} visualReport if this is being called to get visual reporter content
      * @returns {Input} Compiled input.
      */
     descendInput (node, visualReport = false) {
@@ -1825,6 +1826,7 @@ class JSGenerator {
      * @param {*} node The "compat" kind node to generate from.
      * @param {boolean} setFlags Whether flags should be set describing how this function was processed.
      * @param {string|null} [frameName] Name of the stack frame variable, if any
+     * @param {boolean} visualReport if this is being called to get visual reporter content
      * @returns {string} The JS of the call.
      */
     generateCompatibilityLayerCall (node, setFlags, frameName = null, visualReport) {
