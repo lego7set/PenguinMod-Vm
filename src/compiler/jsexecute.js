@@ -103,23 +103,7 @@ runtimeFunctions.waitThreads = `const waitThreads = function*(threads) {
  * @param {Promise} promise The promise to wait for.
  * @returns {*} the value that the promise resolves to, otherwise undefined if the promise rejects
  */
-
-/**
- * isPromise: Determine if a value is Promise-like
- * @param {unknown} promise The value to check
- * @returns {promise is PromiseLike} True if the value is Promise-like (has a .then())
- */
-
-/**
- * executeInCompatibilityLayer: Execute a scratch-vm primitive.
- * @param {*} inputs The inputs to pass to the block.
- * @param {function} blockFunction The primitive's function.
- * @param {boolean} useFlags Whether to set flags (hasResumedFromPromise)
- * @param {string} blockId Block ID to set on the emulated block utility.
- * @param {*|null} branchInfo Extra information object for CONDITIONAL and LOOP blocks. See createBranchInfo().
- * @returns {*} the value returned by the block, if any.
- */
-runtimeFunctions.executeInCompatibilityLayer = `let hasResumedFromPromise = false;
+runtimeFunctions.waitPromise = `
 const waitPromise = function*(promise) {
     const thread = globalState.thread;
     let returnValue;
@@ -140,7 +124,25 @@ const waitPromise = function*(promise) {
     yield;
 
     return returnValue;
-};
+}`;
+
+/**
+ * isPromise: Determine if a value is Promise-like
+ * @param {unknown} promise The value to check
+ * @returns {promise is PromiseLike} True if the value is Promise-like (has a .then())
+ */
+
+/**
+ * executeInCompatibilityLayer: Execute a scratch-vm primitive.
+ * @param {*} inputs The inputs to pass to the block.
+ * @param {function} blockFunction The primitive's function.
+ * @param {boolean} useFlags Whether to set flags (hasResumedFromPromise)
+ * @param {string} blockId Block ID to set on the emulated block utility.
+ * @param {*|null} branchInfo Extra information object for CONDITIONAL and LOOP blocks. See createBranchInfo().
+ * @returns {*} the value returned by the block, if any.
+ */
+runtimeFunctions.executeInCompatibilityLayer = `let hasResumedFromPromise = false;
+${runtimeFunctions.waitPromise};
 const isPromise = value => (
     // see engine/execute.js
     value !== null &&
@@ -590,6 +592,22 @@ runtimeFunctions.tan = `const tan = (angle) => {
     case -90: case 270: return -Infinity;
     }
     return Math.round(Math.tan((Math.PI * angle) / 180) * 1e10) / 1e10;
+}`;
+
+runtimeFunctions.resolveImageURL = `const resolveImageURL = imgURL => 
+    typeof imgURL === 'object' && imgURL.type === 'canvas'
+        ? Promise.resolve(imgURL.canvas)
+        : new Promise(resolve => {
+            const image = new Image();
+            image.crossOrigin = "anonymous";
+            image.onload = resolve(''+image);
+            image.onerror = resolve; // ignore loading errors lol!
+            image.src = imgURL;
+        })`;
+
+runtimeFunctions.parseJSONSafe = `const parseJSONSafe = json => {
+    try return JSON.parse(json)
+    catch return {}
 }`;
 
 /**

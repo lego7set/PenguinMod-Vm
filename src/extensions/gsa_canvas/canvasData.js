@@ -24,15 +24,20 @@ class CanvasVar {
         if (img) this.loadImage();
     }
 
-    get value() {
-        return this.canvas;
-    }
-
     serialize() {
         return [this.id, this.name, this.canvas.toDataURL()];
     }
     toReporterContent() {
         return this.canvas;
+    }
+    toListEditor() {
+        return this.toString();
+    }
+    fromListEditor(edit) {
+        if (this.toString() !== edit) {
+            this.loadImage(edit);
+        }
+        return this;
     }
     toString() {
         return this.canvas.toDataURL();
@@ -49,10 +54,8 @@ class CanvasVar {
         return [this.canvas.width, this.canvas.height];
     }
     set size(size) {
-        console.log('jump in the caac', ...size);
         this.canvas.width = size[0];
         this.canvas.height = size[1];
-        console.log(this.size);
     }
 
     /**

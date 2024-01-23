@@ -1,6 +1,7 @@
 /* eslint-disable no-undef */
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
+const MathUtil = require('../../util/math-util');
 const CanvasVar = require('./canvasData');
 const uid = require('../../util/uid');
 
@@ -27,6 +28,7 @@ class canvas {
         };
         this.runtime.on('variableChange', changeOnVarChange);
         this.runtime.on('variableDelete', changeOnVarChange);
+        this.runtime.registerCompiledExtensionBlocks('newCanvas', this.getCompileInfo());
     }
 
     createVariable(target, id, name, img) {
@@ -119,7 +121,6 @@ class canvas {
                 {
                     opcode: 'canvasGetter',
                     blockType: BlockType.REPORTER,
-                    disableMonitor: true,
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
@@ -130,7 +131,7 @@ class canvas {
                 },
                 {
                     blockType: BlockType.LABEL,
-                    text: "config"
+                    text: "stylizing"
                 },
                 {
                     opcode: 'setGlobalCompositeOperation',
@@ -225,8 +226,23 @@ class canvas {
                     blockType: BlockType.COMMAND
                 },
                 {
+                    opcode: 'dash',
+                    blockType: BlockType.COMMAND,
+                    text: 'set line dash to [dashing] in [canvas]',
+                    arguments: {
+                        dashing: {
+                            type: ArgumentType.STRING,
+                            defaultValue: '[10, 10]'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
                     blockType: BlockType.LABEL,
-                    text: "drawing"
+                    text: "direct drawing"
                 },
                 {
                     opcode: 'clearCanvas',
@@ -316,6 +332,28 @@ class canvas {
                     text: 'unload image [NAME]',
                     arguments: {
                         NAME: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "preloaded image"
+                        }
+                    }
+                },
+                {
+                    opcode: 'getWidthOfPreloaded',
+                    blockType: BlockType.REPORTER,
+                    text: 'get width of [name]',
+                    arguments: {
+                        name: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "preloaded image"
+                        }
+                    }
+                },
+                {
+                    opcode: 'getHeightOfPreloaded',
+                    blockType: BlockType.REPORTER,
+                    text: 'get height of [name]',
+                    arguments: {
+                        name: {
                             type: ArgumentType.STRING,
                             defaultValue: "preloaded image"
                         }
@@ -430,6 +468,240 @@ class canvas {
                         ROTATE: {
                             type: ArgumentType.ANGLE,
                             defaultValue: 90
+                        }
+                    }
+                },
+                {
+                    opcode: 'getWidthOfCanvas',
+                    blockType: BlockType.REPORTER,
+                    text: 'get width of [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'getHeightOfCanvas',
+                    blockType: BlockType.REPORTER,
+                    text: 'get height of [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    blockType: BlockType.LABEL,
+                    text: "path drawing"
+                },
+                {
+                    opcode: 'beginPath',
+                    blockType: BlockType.COMMAND,
+                    text: 'begin path drawing on [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'moveTo',
+                    blockType: BlockType.COMMAND,
+                    text: 'move pen to x:[x] y:[y] on [canvas]',
+                    arguments: {
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'lineTo',
+                    blockType: BlockType.COMMAND,
+                    text: 'add line going to x:[x] y:[y] on [canvas]',
+                    arguments: {
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'arcTo',
+                    blockType: BlockType.COMMAND,
+                    text: 'add arc going to x:[x] y:[y] on [canvas] with control points [controlPoints] and radius [radius]',
+                    arguments: {
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        controlPoints: {
+                            type: ArgumentType.POLYGON,
+                            nodes: 2
+                        },
+                        radius: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                "---",
+                {
+                    opcode: 'addRect',
+                    blockType: BlockType.COMMAND,
+                    text: 'add a rectangle at x:[x] y:[y] with width:[width] height:[height] to [canvas]',
+                    arguments: {
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        width: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 10
+                        },
+                        height: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 10
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'addEllipse',
+                    blockType: BlockType.COMMAND,
+                    text: 'add a ellipse at x:[x] y:[y] with width:[width] height:[height] pointed towards [dir] to [canvas]',
+                    arguments: {
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        width: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 10
+                        },
+                        height: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 10
+                        },
+                        dir: {
+                            type: ArgumentType.ANGLE,
+                            defaultValue: 90
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'addEllipseStartStop',
+                    blockType: BlockType.COMMAND,
+                    text: 'add a ellipse with starting rotation [start] and ending rotation [end] at x:[x] y:[y] with width:[width] height:[height] pointed towards [dir] to [canvas]',
+                    arguments: {
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        width: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 10
+                        },
+                        height: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 10
+                        },
+                        start: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        end: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '360'
+                        },
+                        dir: {
+                            type: ArgumentType.ANGLE,
+                            defaultValue: 90
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                "---",
+                {
+                    opcode: 'closePath',
+                    blockType: BlockType.COMMAND,
+                    text: 'attempt to close any open path in [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'stroke',
+                    blockType: BlockType.COMMAND,
+                    text: 'draw outline for current path in [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'fill',
+                    blockType: BlockType.COMMAND,
+                    text: 'draw fill for current path in [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
                         }
                     }
                 }
@@ -567,6 +839,460 @@ class canvas {
             }, ScratchBlocks.Msg.VARIABLE_MODAL_TITLE, 'canvas');
     }
 
+    /**
+     * This function is used for any compiled blocks in the extension if they exist.
+     * Data in this function is given to the IR & JS generators.
+     * Data must be valid otherwise errors may occur.
+     * @returns {object} functions that create data for compiled blocks.
+     */
+    getCompileInfo() {
+        return {
+            ir: {
+                canvasGetter: (generator, block) => ({
+                    kind: 'input',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                setGlobalCompositeOperation: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    CompositeOperation: block.fields.CompositeOperation.value
+                }),
+                setSize: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    width: generator.descendInputOfBlock(block, 'width'),
+                    height: generator.descendInputOfBlock(block, 'height')
+                }),
+                setTransparency: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    transparency: generator.descendInputOfBlock(block, 'transparency')
+                }),
+                setFill: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    color: generator.descendInputOfBlock(block, 'color')
+                }),
+                setBorderColor: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    color: generator.descendInputOfBlock(block, 'color')
+                }),
+                setBorderSize: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    size: generator.descendInputOfBlock(block, 'size')
+                }),
+                dash: (generator, block) => ({
+                    kind: 'stack',
+                    dashing: generator.descendInputOfBlock(block, 'dashing'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                clearCanvas: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                clearAria: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    width: generator.descendInputOfBlock(block, 'width'),
+                    height: generator.descendInputOfBlock(block, 'height')
+                }),
+                drawRect: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    width: generator.descendInputOfBlock(block, 'width'),
+                    height: generator.descendInputOfBlock(block, 'height')
+                }),
+                preloadUriImage: (generator, block) => ({
+                    kind: 'stack',
+                    URI: generator.descendInputOfBlock(block, 'URI'),
+                    NAME: generator.descendInputOfBlock(block, 'NAME')
+                }),
+                unloadUriImage: (generator, block) => ({
+                    kind: 'stack',
+                    NAME: generator.descendInputOfBlock(block, 'NAME')
+                }),
+                getWidthOfPreloaded: (generator, block) => ({
+                    kind: 'input',
+                    name: generator.descendInputOfBlock(block, 'name')
+                }),
+                getHeightOfPreloaded: (generator, block) => ({
+                    kind: 'input',
+                    name: generator.descendInputOfBlock(block, 'name')
+                }),
+                drawUriImage: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    URI: generator.descendInputOfBlock(block, 'URI'),
+                    X: generator.descendInputOfBlock(block, 'X'),
+                    Y: generator.descendInputOfBlock(block, 'Y')
+                }),
+                drawUriImageWHR: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    URI: generator.descendInputOfBlock(block, 'URI'),
+                    X: generator.descendInputOfBlock(block, 'X'),
+                    Y: generator.descendInputOfBlock(block, 'Y'),
+                    WIDTH: generator.descendInputOfBlock(block, 'WIDTH'),
+                    HEIGHT: generator.descendInputOfBlock(block, 'HEIGHT'),
+                    ROTATE: generator.descendInputOfBlock(block, 'ROTATE')
+                }),
+                drawUriImageWHCX1Y1X2Y2R: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    URI: generator.descendInputOfBlock(block, 'URI'),
+                    X: generator.descendInputOfBlock(block, 'X'),
+                    Y: generator.descendInputOfBlock(block, 'Y'),
+                    WIDTH: generator.descendInputOfBlock(block, 'WIDTH'),
+                    HEIGHT: generator.descendInputOfBlock(block, 'HEIGHT'),
+                    CROPX: generator.descendInputOfBlock(block, 'CROPX'),
+                    CROPY: generator.descendInputOfBlock(block, 'CROPY'),
+                    CROPW: generator.descendInputOfBlock(block, 'CROPW'),
+                    CROPH: generator.descendInputOfBlock(block, 'CROPH'),
+                    ROTATE: generator.descendInputOfBlock(block, 'ROTATE')
+                }),
+                getWidthOfCanvas: (generator, block) => ({
+                    kind: 'input',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                getHeightOfCanvas: (generator, block) => ({
+                    kind: 'input',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                beginPath: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                moveTo: (generator, block) => ({
+                    kind: 'stack',
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                lineTo: (generator, block) => ({
+                    kind: 'stack',
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                arcTo: (generator, block) => ({
+                    kind: 'stack',
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    controlPoints: generator.descendInputOfBlock(block, 'controlPoints'),
+                    radius: generator.descendInputOfBlock(block, 'radius'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                addRect: (generator, block) => ({
+                    kind: 'stack',
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    width: generator.descendInputOfBlock(block, 'width'),
+                    height: generator.descendInputOfBlock(block, 'height'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                addEllipse: (generator, block) => ({
+                    kind: 'stack',
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    width: generator.descendInputOfBlock(block, 'width'),
+                    height: generator.descendInputOfBlock(block, 'height'),
+                    dir: generator.descendInputOfBlock(block, 'dir'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                addEllipseStartStop: (generator, block) => ({
+                    kind: 'stack',
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    width: generator.descendInputOfBlock(block, 'width'),
+                    height: generator.descendInputOfBlock(block, 'height'),
+                    start: generator.descendInputOfBlock(block, 'start'),
+                    end: generator.descendInputOfBlock(block, 'end'),
+                    dir: generator.descendInputOfBlock(block, 'dir'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                stroke: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                fill: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                })
+            },
+            js: {
+                canvasGetter: (node, compiler) => compiler.descendVariable(node.variable),
+                setGlobalCompositeOperation: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+
+                    compiler.source += `${ctx}.globalCompositeOperation = '${node.CompositeOperation}';\n`;
+                },
+                setSize: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const width = compiler.descendInput(node.width).asNumber();
+                    const height = compiler.descendInput(node.height).asNumber();
+
+                    compiler.source += `${canvas}.canvas.width = ${width};\n`;
+                    compiler.source += `${canvas}.canvas.height = ${height};\n`;
+                },
+                setTransparency: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const transparency = compiler.descendInput(node.transparency).asNumber();
+
+                    compiler.source += `${ctx}.globalAlpha = ${transparency} / 100;\n`;
+                },
+                setFill: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const color = compiler.descendInput(node.color).asColor();
+
+                    compiler.source += `${ctx}.fillStyle = ${color};\n`;
+                },
+                setBorderColor: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const color = compiler.descendInput(node.color).asColor();
+
+                    compiler.source += `${ctx}.strokeStyle = ${color};\n`;
+                },
+                setBorderSize: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const size = compiler.descendInput(node.size).asNumber();
+
+                    compiler.source += `${ctx}.fillStyle = ${size};\n`;
+                },
+                dash: (node, compiler, {ConstantInput}) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const arrInp = compiler.descendInput(node.size);
+                    const isContant = arrInp instanceof ConstantInput;
+
+                    compiler.source += `${ctx}.setLineDash(`;
+                    if (!isContant) compiler.source += `parseJSONSafe(`;
+                    compiler.source += arrInp.asColor();
+                    if (!isContant) compiler.source += ')';
+                    compiler.source += ');';
+                },
+                clearCanvas: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+
+                    compiler.source += `${ctx}.clearRect(0, 0, ${canvas}.canvas.width, ${canvas}.canvas.height);\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                },
+                clearAria: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const width = compiler.descendInput(node.width).asNumber();
+                    const height = compiler.descendInput(node.height).asNumber();
+
+                    compiler.source += `${ctx}.clearRect(${x}, ${y}, ${width}, ${height});\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                },
+                drawRect: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const width = compiler.descendInput(node.width).asNumber();
+                    const height = compiler.descendInput(node.height).asNumber();
+
+                    compiler.source += `${ctx}.fillRect(${x}, ${y}, ${width}, ${height});\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                },
+                preloadUriImage: (node, compiler) => {
+                    const allPreloaded = compiler.evaluateOnce('{}');
+                    const preloadName = compiler.descendInput(node.NAME).asString();
+                    const preloadUri = compiler.descendInput(node.URI).asUnkown();
+
+                    compiler.source += `${allPreloaded}[${preloadName}] = waitPromise(resolveImageURL(${preloadUri}));\n`;
+                },
+                unloadUriImage: (node, compiler) => {
+                    const allPreloaded = compiler.evaluateOnce('{}');
+                    const preloadName = compiler.descendInput(node.NAME).asString();
+
+                    compiler.source += `if (${allPreloaded}[${preloadName}]) {`;
+                    compiler.source += `${allPreloaded}[${preloadName}].remove();\n`;
+                    compiler.source += `delete ${allPreloaded}[${preloadName}];\n`;
+                    compiler.source += '}';
+                },
+                getWidthOfPreloaded: (node, compiler) => {
+                    const allPreloaded = compiler.evaluateOnce('{}');
+                    const preloadName = compiler.descendInput(node.name).asString();
+                    return new TypedInput(`${allPreloaded}[${preloadName}].height`, TYPE_NUMBER);
+                },
+                getHeightOfPreloaded: (node, compiler) => {
+                    const allPreloaded = compiler.evaluateOnce('{}');
+                    const preloadName = compiler.descendInput(node.name).asString();
+                    return new TypedInput(`${allPreloaded}[${preloadName}].height`, TYPE_NUMBER);
+                },
+                drawUriImage: (node, compiler) => {
+                    const allPreloaded = compiler.evaluateOnce('{}');
+                    const preloadName = compiler.descendInput(node.name).asString();
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const uri = compiler.descendInput(node.URI).asNumber();
+                    const x = compiler.descendInput(node.X).asNumber();
+                    const y = compiler.descendInput(node.Y).asNumber();
+
+                    compiler.source += `${ctx}.drawImage(`;
+                    compiler.source += `${allPreloaded}[${preloadName}] ? `;
+                    compiler.source += `${allPreloaded}[${preloadName}] : `;
+                    compiler.source += `waitPromise(resolveImageURL(${uri}))`;
+                    compiler.source += `, ${x}, ${y});\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                },
+                drawUriImageWHR: (node, compiler) => {
+                    const allPreloaded = compiler.evaluateOnce('{}');
+                    const preloadName = compiler.descendInput(node.name).asString();
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const uri = compiler.descendInput(node.URI).asNumber();
+                    const x = compiler.descendInput(node.X).asNumber();
+                    const y = compiler.descendInput(node.Y).asNumber();
+                    const width = compiler.descendInput(node.WIDTH).asNumber();
+                    const height = compiler.descendInput(node.HEIGHT).asNumber();
+                    const dir = compiler.descendInput(node.ROTATE).asNumber();
+
+                    compiler.source += `${ctx}.drawImage(`;
+                    compiler.source += `${allPreloaded}[${preloadName}] ? `;
+                    compiler.source += `${allPreloaded}[${preloadName}] : `;
+                    compiler.source += `waitPromise(resolveImageURL(${uri}))`;
+                    compiler.source += `, ${x}, ${y}, ${width}, ${height}, ${dir});\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                },
+                drawUriImageWHCX1Y1X2Y2R: (node, compiler) => {
+                    const allPreloaded = compiler.evaluateOnce('{}');
+                    const preloadName = compiler.descendInput(node.name).asString();
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const uri = compiler.descendInput(node.URI).asNumber();
+                    const x = compiler.descendInput(node.X).asNumber();
+                    const y = compiler.descendInput(node.Y).asNumber();
+                    const width = compiler.descendInput(node.WIDTH).asNumber();
+                    const height = compiler.descendInput(node.HEIGHT).asNumber();
+                    const dir = compiler.descendInput(node.ROTATE).asNumber();
+                    const cropX = compiler.descendInput(node.CROPX).asNumber();
+                    const cropY = compiler.descendInput(node.CROPY).asNumber();
+                    const cropWidth = compiler.descendInput(node.CROPW).asNumber();
+                    const cropHeight = compiler.descendInput(node.CROPH).asNumber();
+
+                    compiler.source += `${ctx}.drawImage(`;
+                    compiler.source += `${allPreloaded}[${preloadName}] ? `;
+                    compiler.source += `${allPreloaded}[${preloadName}] : `;
+                    compiler.source += `waitPromise(resolveImageURL(${uri}))`;
+                    compiler.source += `, ${x}, ${y}, ${width}, ${height}, ${dir}, `;
+                    compiler.source += `${cropX}, ${cropY}, ${cropWidth}, ${cropHeight});\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                },
+                getWidthOfCanvas: (node, compiler, {TYPE_NUMBER, TypedInput}) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    return new TypedInput(`${canvas}.canvas.width`, TYPE_NUMBER);
+                },
+                getHeightOfCanvas: (node, compiler, {TYPE_NUMBER, TypedInput}) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    return new TypedInput(`${canvas}.canvas.height`, TYPE_NUMBER);
+                },
+                beginPath: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+
+                    compiler.source += `${ctx}.beginPath();\n`;
+                },
+                moveTo: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+
+                    compiler.source += `${ctx}.moveTo(${x}, ${y});\n`;
+                },
+                lineTo: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+
+                    compiler.source += `${ctx}.lineTo(${x}, ${y});\n`;
+                },
+                arcTo: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const controlPoints = compiler.descendInput(node.controlPoints).asUnknown();
+                    const radius = compiler.descendInput(node.radius).asNumber();
+
+                    compiler.source += `${ctx}.arcTo(${x}, ${y}, ...${controlPoints}, ${radius});\n`;
+                },
+                addRect: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const width = compiler.descendInput(node.width).asNumber();
+                    const height = compiler.descendInput(node.height).asNumber();
+
+                    compiler.source += `${ctx}.rect(${x}, ${y}, ${width}, ${height});\n`;
+                },
+                addEllipse: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const width = compiler.descendInput(node.width).asNumber();
+                    const height = compiler.descendInput(node.height).asNumber();
+                    const dir = compiler.descendInput(node.dir).asNumber();
+
+                    compiler.source += `${ctx}.ellipse(${x}, ${y}, ${width}, ${height}, ${dir} * Math.PI / 180, 0, 2 * Math.PI);\n`;
+                },
+                addEllipseStartStop: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const width = compiler.descendInput(node.width).asNumber();
+                    const height = compiler.descendInput(node.height).asNumber();
+                    const dir = compiler.descendInput(node.dir).asNumber();
+                    const start = compiler.descendInput(node.start).asNumber();
+                    const end = compiler.descendInput(node.end).asNumber();
+
+                    compiler.source += `${ctx}.ellipse(${x}, ${y}, ${width}, ${height}, ${dir} * Math.PI / 180, ${start} * Math.PI / 180, ${end} * Math.PI / 180);\n`;
+                },
+                closePath: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+
+                    compiler.soource += `${ctx}.closePath()`;
+                },
+                stroke: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+
+                    compiler.source += `${ctx}.stroke();\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                },
+                fill: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+
+                    compiler.source += `${ctx}.fill();\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                }                
+            }
+        };
+    }
+
     canvasGetter(args, util) {
         const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
         return canvasObj;
@@ -624,11 +1350,9 @@ class canvas {
         ctx.rotate(MathUtil.degToRad(ROTATE - 90));
 
         // use sizes from the image if none specified
-        const width = (WIDTH ?? image.width) * this._penRes;
-        const height = (HEIGHT ?? image.height) * this._penRes;
-        const realX = (X * this._penRes) - (width / 2);
-        const realY = (-Y * this._penRes) - (height / 2);
-        const drawArgs = [CROPX, CROPY, CROPW, CROPH, realX, realY, width, height];
+        const width = WIDTH ?? image.width;
+        const height = HEIGHT ?? image.height;
+        const drawArgs = [CROPX, CROPY, CROPW, CROPH, X, Y, width, height];
 
         // if cropx or cropy are undefined then remove the crop args
         if (typeof (CROPX ?? CROPY) === "undefined") {
@@ -684,6 +1408,14 @@ class canvas {
             delete this.preloadedImages[NAME];
         }
     }
+    getWidthOfPreloaded ({ name }) {
+        if (!this.preloadedImages.hasOwnProperty(name)) return 0;
+        return this.preloadedImages[name].width;
+    }
+    getHeightOfPreloaded ({ name }) {
+        if (!this.preloadedImages.hasOwnProperty(name)) return 0;
+        return this.preloadedImages[name].height;
+    }
 
     clearAria(args, util) {
         const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
@@ -701,6 +1433,15 @@ class canvas {
         const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
         const ctx = canvasObj.canvas.getContext('2d');
         ctx.globalAlpha = args.transparency / 100;
+    }
+
+    getWidthOfCanvas({ canvas }, util) {
+        const canvasObj = this.getOrCreateVariable(util.target, canvas.id, canvas.name);
+        return canvasObj.size[0];
+    }
+    getHeightOfCanvas({ canvas }, util) {
+        const canvasObj = this.getOrCreateVariable(util.target, canvas.id, canvas.name);
+        return canvasObj.size[1];
     }
 }
 
