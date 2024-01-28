@@ -107,8 +107,7 @@ const defaultBuiltinExtensions = {
     // jgPathfinding: EZ pathfinding for beginners :D hopefully
     jgPathfinding: () => require("../extensions/jg_pathfinding"),
     // jgAnimation: animate idk
-    // hiding so fir doesnt touch
-    // jgAnimation: () => require("../extensions/jg_animation"),
+    jgAnimation: () => require("../extensions/jg_animation"),
 
     // jgStorage: event extension requested by Fir & silvxrcat
     jgStorage: () => require("../extensions/jg_storage"),
