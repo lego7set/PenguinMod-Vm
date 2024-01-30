@@ -52,6 +52,9 @@ ${blockSeparator}
     </value>
 </block>
 ${blockSeparator}
+%b21> `+/* set replacer */`
+%b22> `+/* reset replacers */`
+%b23> `+/* use replacers */`
 <block type="operator_character_to_code">
     <value name="ONE">
         <shadow type="text">
@@ -199,6 +202,7 @@ class pmOperatorsExpansion {
                 ...generateJoinTranslations(9, "字串組合", 1)
             }
         });
+        this.replacers = Object.create({});
     }
 
     orderCategoryBlocks(extensionBlocks) {
@@ -414,6 +418,38 @@ class pmOperatorsExpansion {
                         },
                     }
                 },
+                {
+                    opcode: 'setReplacer',
+                    text: 'set replacer [REPLACER] to [TEXT]',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        REPLACER: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "${replacer}"
+                        },
+                        TEXT: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "world"
+                        },
+                    }
+                },
+                {
+                    opcode: 'resetReplacers',
+                    text: 'reset replacers',
+                    blockType: BlockType.COMMAND
+                },
+                {
+                    opcode: 'applyReplacers',
+                    text: 'apply replacers to [TEXT]',
+                    blockType: BlockType.REPORTER,
+                    disableMonitor: true,
+                    arguments: {
+                        TEXT: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "Hello ${replacer}!"
+                        },
+                    }
+                },
             ],
             menus: {
                 part: {
@@ -609,6 +645,23 @@ class pmOperatorsExpansion {
             + Cast.toString(args.STRING7)
             + Cast.toString(args.STRING8)
             + Cast.toString(args.STRING9);
+    }
+
+    setReplacer(args) {
+        const replacer = Cast.toString(args.REPLACER);
+        const text = Cast.toString(args.TEXT);
+        this.replacers[replacer] = text;
+    }
+    resetReplacers() {
+        this.replacers = Object.create({});
+    }
+    applyReplacers(args) {
+        let text = Cast.toString(args.TEXT);
+        for (const replacer in this.replacers) {
+            const replacementText = this.replacers[replacer];
+            text = text.replaceAll(replacer, replacementText);
+        }
+        return text;
     }
 }
 
