@@ -55,6 +55,9 @@ ${blockSeparator}
 %b21> `+/* set replacer */`
 %b22> `+/* reset replacers */`
 %b23> `+/* use replacers */`
+${blockSeparator}
+%b24> `+/* text after () in () */`
+%b25> `+/* text before () in () */`
 <block type="operator_character_to_code">
     <value name="ONE">
         <shadow type="text">
@@ -450,6 +453,38 @@ class pmOperatorsExpansion {
                         },
                     }
                 },
+                {
+                    opcode: 'textAfter',
+                    text: 'text after [TEXT] in [BASE]',
+                    blockType: BlockType.REPORTER,
+                    disableMonitor: true,
+                    arguments: {
+                        TEXT: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "Hello"
+                        },
+                        BASE: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "Hello world!"
+                        },
+                    }
+                },
+                {
+                    opcode: 'textBefore',
+                    text: 'text before [TEXT] in [BASE]',
+                    blockType: BlockType.REPORTER,
+                    disableMonitor: true,
+                    arguments: {
+                        TEXT: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "world"
+                        },
+                        BASE: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "Hello world!"
+                        },
+                    }
+                },
             ],
             menus: {
                 part: {
@@ -662,6 +697,21 @@ class pmOperatorsExpansion {
             text = text.replaceAll(replacer, replacementText);
         }
         return text;
+    }
+
+    textAfter(args) {
+        const text = Cast.toString(args.TEXT);
+        const base = Cast.toString(args.BASE);
+        const idx = base.indexOf(text);
+        if (idx < 0) return '';
+        return base.substring(idx + text.length);
+    }
+    textBefore(args) {
+        const text = Cast.toString(args.TEXT);
+        const base = Cast.toString(args.BASE);
+        const idx = base.indexOf(text);
+        if (idx < 0) return '';
+        return base.substring(0, idx);
     }
 }
 
