@@ -974,6 +974,15 @@ class Runtime extends EventEmitter {
     }
 
     /**
+     * Event name when the runtime is about to be paused temporarily.
+     * Fires before runtime.paused = true.
+     * @const {string}
+     */
+    static get RUNTIME_PRE_PAUSED () {
+        return 'RUNTIME_PRE_PAUSED';
+    }
+
+    /**
      * Event name when the runtime is unpaused.
      * @const {string}
      */
@@ -2706,6 +2715,7 @@ class Runtime extends EventEmitter {
      */
     pause() {
         if (this.paused) return;
+        this.emit(Runtime.RUNTIME_PRE_PAUSED);
         this.paused = true;
         // pause all audio contexts (that includes you, extended audio)
         // yea extended audio gets extra permissions :3
