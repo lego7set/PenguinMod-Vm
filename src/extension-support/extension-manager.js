@@ -710,6 +710,7 @@ class ExtensionManager {
                 item = maybeFormatMessage(item, extensionMessageContext);
                 switch (typeof item) {
                 case 'object':
+                    if (Array.isArray(item)) return item.slice(0, 2);
                     return [
                         maybeFormatMessage(item.text, extensionMessageContext),
                         item.value

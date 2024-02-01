@@ -1,3 +1,4 @@
+/* eslint-disable no-invalid-this */
 /* eslint-disable no-undef */
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
@@ -5,7 +6,118 @@ const MathUtil = require('../../util/math-util');
 const CanvasVar = require('./canvasData');
 const uid = require('../../util/uid');
 
+const sanitize = string => {
+    if (typeof string !== 'string') {
+        log.warn(`sanitize got unexpected type: ${typeof string}`);
+        string = '' + string;
+    }
+    return JSON.stringify(string).slice(1, -1);
+};
 const DefaultDrawImage = 'https://studio.penguinmod.com/favicon.ico'; 
+const canvasPropInfos = [
+    ['compositing method', 'globalCompositeOperation', [
+        ['source over', 'source-over'],
+        ['source in', 'source-in'],
+        ['source out', 'source-out'],
+        ['source atop', 'source-atop'],
+        ['destination over', 'destination-over'],
+        ['destination in', 'destination-in'],
+        ['destination out', 'destination-out'],
+        ['destination atop', 'destination-atop'],
+        ['lighter', 'lighter'],
+        ['copy', 'copy'],
+        ['xor', 'xor'],
+        ['multiply', 'multiply'],
+        ['screen', 'screen'],
+        ['overlay', 'overlay'],
+        ['darken', 'darken'],
+        ['lighten', 'lighten'],
+        ['color dodge', 'color-dodge'],
+        ['color burn', 'color-burn'],
+        ['hard light', 'hard-light'],
+        ['soft light', 'soft-light'],
+        ['difference', 'difference'],
+        ['exclusion', 'exclusion'],
+        ['hue', 'hue'],
+        ['saturation', 'saturation'],
+        ['color', 'color'],
+        ['luminosity', 'luminosity']
+    ], 'source-over'],
+    ['CSS filter', 'filter', ArgumentType.STRING, 'none'],
+    ['font', 'font', ArgumentType.STRING, ''],
+    ['font kerning method', 'fontKerning', [
+        ['browser defined', 'auto'],
+        ['font defined', 'normal'],
+        ['none', 'none']
+    ], 'normal'],
+    ['font stretch', 'fontStretch', [
+        ['ultra condensed', 'ultra-condensed'],
+        ['extra condensed', 'extra-condensed'],
+        ['condensed', 'condensed'],
+        ['normal', 'normal'],
+        ['semi expanded', 'semi-expanded'],
+        ['expanded', 'expanded'],
+        ['extra expanded', 'extra-expanded'],
+        ['ultra expanded', 'ultra-expanded']
+    ], 'normal'],
+    ['font case sizing', 'fontVariantCaps', [
+        ['normal', 'normal'],
+        ['uni-case', 'unicase'],
+        ['titling-case', 'titling-caps'],
+        ['smaller uppercase', 'small-caps'],
+        ['smaller cased characters', 'all-small-caps'],
+        ['petite uppercase', 'petite-caps'],
+        ['petite cased characters', 'all-petite-caps']
+    ], 'normal'],
+    ['transparency', 'globalAlpha', ArgumentType.NUMBER, '0'],
+    ['image smoothing', 'imageSmoothingEnabled', ArgumentType.BOOLEAN, ''],
+    ['image smoothing quality', 'imageSmoothingQuality', [
+        ['low', 'low'],
+        ['medium', 'medium'],
+        ['high', 'high']
+    ], 'low'],
+    ['letter spacing', 'letterSpacing', ArgumentType.NUMBER, '0'],
+    ['line cap shape', 'lineCap', [
+        ['sharp', 'butt'],
+        ['round', 'round'],
+        ['square', 'square']
+    ], 'butt'],
+    ['line dash offset', 'lineDashOffset', ArgumentType.NUMBER, '0'],
+    ['line join shape', 'lineJoin', [
+        ['round', 'round'],
+        ['beveled', 'bevel'],
+        ['sharp', 'miter']
+    ], 'miter'],
+    ['line size', 'lineWidth', ArgumentType.NUMBER, '1'],
+    ['sharp line join limit', 'miterLimit', ArgumentType.NUMBER, '10'],
+    ['shadow blur', 'shadowBlur', ArgumentType.NUMBER, '0'],
+    ['shadow color', 'shadowColor', ArgumentType.COLOR, null],
+    ['shadow X offset', 'shadowOffsetX', ArgumentType.NUMBER, '0'],
+    ['shadow Y offset', 'shadowOffsetY', ArgumentType.NUMBER, '0'],
+    ['line color', 'strokeStyle', ArgumentType.COLOR, null],
+    ['text horizontal alignment', 'textAlign', [
+        ['start', 'start'],
+        ['left', 'left'],
+        ['center', 'center'],
+        ['right', 'right'],
+        ['end', 'end']
+    ], 'start'],
+    ['text vertical alignment', 'textBaseline', [
+        ['top', 'top'],
+        ['hanging', 'hanging'],
+        ['middle', 'middle'],
+        ['alphabetic', 'alphabetic'],
+        ['ideographic', 'ideographic'],
+        ['bottom', 'bottom']
+    ], 'alphabetic'],
+    ['text rendering optimisation', 'textRendering', [
+        ['auto', 'auto'],
+        ['render speed', 'optimizeSpeed'],
+        ['legibility', 'optimizeLegibility'],
+        ['geometric precision', 'geometricPrecision']
+    ], 'auto'],
+    ['word spacing', 'wordSpacing', ArgumentType.NUMBER, '0']
+];
 
 /**
  * Class
@@ -20,51 +132,53 @@ class canvas {
         this.runtime = runtime;
         this.lastVars = [];
         this.preloadedImages = {};
+        this.propList = [];
+        this.sbInfo = {};
+        for (const item of canvasPropInfos) {
+            this.propList.push(item.slice(0, 2));
+            const info = {
+                isDummy: false,
+                default: item[3],
+                type: item[2]
+            };
+            switch (item[2]) {
+            case ArgumentType.STRING:
+                info.shadow = 'text';
+                break;
+            case ArgumentType.NUMBER:
+                info.shadow = 'math_number';
+                break;
+            case ArgumentType.BOOLEAN:
+                info.check = 'Boolean';
+                break;
+            case ArgumentType.COLOR:
+                info.shadow = 'colour_picker';
+                break;
+            default:
+                info.isDummy = true;
+                info.options = item[2];
+            }
+            this.sbInfo[item[1]] = info;
+        }
+        this.runtime.registerVariable('canvas', CanvasVar);
+        this.runtime.registerCompiledExtensionBlocks('newCanvas', this.getCompileInfo());
 
-        const changeOnVarChange = type => {
+        const updateVariables = type => {
             if (type === 'canvas') {
                 this.runtime.vm.emitWorkspaceUpdate();
             }
         };
-        this.runtime.on('variableChange', changeOnVarChange);
-        this.runtime.on('variableDelete', changeOnVarChange);
-        this.runtime.registerCompiledExtensionBlocks('newCanvas', this.getCompileInfo());
-    }
-
-    createVariable(target, id, name, img) {
-        id ??= uid();
-        target ??= this.runtime.getTargetForStage();
-        if (target.variables[id]) return;
-        const cnvs = new CanvasVar(this.runtime, id, name, img);
-        target.variables[id] = cnvs;
-        return cnvs;
-    }
-
-    getOrCreateVariable(target, id, name) {
-        const variable = target.lookupVariableById(id);
-        if (variable) return variable;
-        return this.createVariable(id, name);
-    }
-
-    deserialize(data) {
-        for (const variable of data) {
-            const targetId = data.pop();
-            const target = this.runtime.getTargetById(targetId);
-            this.createVariable(target, ...variable);
-        }
-    }
-
-    serialize() {
-        const vars = [];
-        for (const target of this.runtime.targets) {
-            for (const varId in target.variables) {
-                const variable = target.variables[varId];
-                const varJSON = variable.serialize();
-                varJSON.push(target.id);
-                vars.push(varJSON);
-            }
-        }
-        return vars;
+        this.runtime.on('variableCreate', updateVariables);
+        this.runtime.on('variableChange', updateVariables);
+        this.runtime.on('variableDelete', updateVariables);
+        let infoObj = {};
+        Object.defineProperty(ScratchBlocks.Blocks, 'newCanvas_setProperty', {
+            set: block => {
+                this._implementSBInfo(block);
+                infoObj = block;
+            },
+            get: () => infoObj
+        });
     }
 
     orderCategoryBlocks(blocks) {
@@ -100,6 +214,48 @@ class canvas {
         return variables;
     }
 
+    _implementSBInfo(block) {
+        const info = this.sbInfo;
+        block.renderInput = function(item) {
+            if (!item) item = this.getFieldValue('prop');
+            const existingInput = this.getInput('value');
+            const isInputCurrentlyUsed = existingInput.type !== ScratchBlocks.DUMMY_INPUT
+                && !existingInput.connection.targetBlock()?.isShadow?.();
+            const target = info[item];
+            if (this.lastItem === item || (isInputCurrentlyUsed && !target.isDummy)) return;
+            this.removeInput('value');
+            if (target.isDummy) {
+                const inp = this.appendDummyInput('value');
+                const field = new ScratchBlocks.FieldDropdown(target.options);
+                inp.appendField(field, 'value');
+                field.setValue(target.default);
+                return;
+            }
+        
+            const inp = this.appendValueInput('value');
+            inp.setCheck(target.check);
+            if (target.shadow && !this.isInsertionMarker()) {
+                const shadow = this.workspace.newBlock(target.shadow);
+                shadow.setShadow(true);
+                shadow.initSvg();
+                shadow.inputList[0].fieldRow[0].setValue(target.default);
+                inp.connection.connect(shadow.outputConnection);
+                shadow.render(false);
+            }
+        };
+        const oldInit = block.init;
+        block.init = function() {
+            oldInit.apply(this);
+            this.appendDummyInput('value');
+            const dropdownField = this.getField('prop');
+            dropdownField.setValidator(item => {
+                this.renderInput(item);
+                return item;
+            });
+            this.renderInput();
+        };
+    }
+
     /**
      * @returns {object} metadata for this extension and its blocks.
      */
@@ -108,8 +264,6 @@ class canvas {
             id: 'newCanvas',
             name: 'html canvas',
             color1: '#0069c2',
-            color2: '#0060B4',
-            color3: '#0060B4',
             isDynamic: true,
             orderBlocks: this.orderCategoryBlocks.bind(this),
             blocks: [
@@ -134,21 +288,6 @@ class canvas {
                     text: "stylizing"
                 },
                 {
-                    opcode: 'setGlobalCompositeOperation',
-                    text: 'set composite operation of [canvas] to [CompositeOperation]',
-                    arguments: {
-                        canvas: {
-                            type: ArgumentType.STRING,
-                            menu: 'canvas'
-                        },
-                        CompositeOperation: {
-                            type: ArgumentType.STRING,
-                            menu: 'CompositeOperation'
-                        }
-                    },
-                    blockType: BlockType.COMMAND
-                },
-                {
                     opcode: 'setSize',
                     text: 'set width: [width] height: [height] of [canvas]',
                     arguments: {
@@ -168,62 +307,34 @@ class canvas {
                     blockType: BlockType.COMMAND
                 },
                 {
-                    opcode: 'setTransparency',
-                    text: 'set transparency of [canvas] to [transparency]',
+                    opcode: 'setProperty',
+                    text: 'set [prop] of [canvas] to ',
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
                             menu: 'canvas'
                         },
-                        transparency: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: '0'
+                        prop: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvasProps'
                         }
                     },
                     blockType: BlockType.COMMAND
                 },
                 {
-                    opcode: 'setFill',
-                    text: 'set fill color of [canvas] to [color]',
+                    opcode: 'getProperty',
+                    text: 'get [prop] of [canvas]',
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
                             menu: 'canvas'
                         },
-                        color: {
-                            type: ArgumentType.COLOR
-                        }
-                    },
-                    blockType: BlockType.COMMAND
-                },
-                {
-                    opcode: 'setBorderColor',
-                    text: 'set line color of [canvas] to [color]',
-                    arguments: {
-                        canvas: {
+                        prop: {
                             type: ArgumentType.STRING,
-                            menu: 'canvas'
-                        },
-                        color: {
-                            type: ArgumentType.COLOR
+                            menu: 'canvasProps'
                         }
                     },
-                    blockType: BlockType.COMMAND
-                },
-                {
-                    opcode: 'setBorderSize',
-                    text: 'set line size of [canvas] to [size]',
-                    arguments: {
-                        canvas: {
-                            type: ArgumentType.STRING,
-                            menu: 'canvas'
-                        },
-                        size: {
-                            type: ArgumentType.NUMBER,
-                            defaultValue: '1'
-                        }
-                    },
-                    blockType: BlockType.COMMAND
+                    blockType: BlockType.REPORTER
                 },
                 {
                     opcode: 'dash',
@@ -472,28 +583,6 @@ class canvas {
                     }
                 },
                 {
-                    opcode: 'getWidthOfCanvas',
-                    blockType: BlockType.REPORTER,
-                    text: 'get width of [canvas]',
-                    arguments: {
-                        canvas: {
-                            type: ArgumentType.STRING,
-                            menu: 'canvas'
-                        }
-                    }
-                },
-                {
-                    opcode: 'getHeightOfCanvas',
-                    blockType: BlockType.REPORTER,
-                    text: 'get height of [canvas]',
-                    arguments: {
-                        canvas: {
-                            type: ArgumentType.STRING,
-                            menu: 'canvas'
-                        }
-                    }
-                },
-                {
                     blockType: BlockType.LABEL,
                     text: "path drawing"
                 },
@@ -704,119 +793,62 @@ class canvas {
                             menu: 'canvas'
                         }
                     }
+                },
+                {
+                    blockType: BlockType.LABEL,
+                    text: "utilizing"
+                },
+                {
+                    opcode: 'putOntoSprite',
+                    blockType: BlockType.COMMAND,
+                    text: 'set this sprites costume to [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'getDataURI',
+                    blockType: BlockType.REPORTER,
+                    text: 'get data URL of [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'getWidthOfCanvas',
+                    blockType: BlockType.REPORTER,
+                    text: 'get width of [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'getHeightOfCanvas',
+                    blockType: BlockType.REPORTER,
+                    text: 'get height of [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
                 }
             ],
             menus: {
                 canvas: {
                     variableType: 'canvas'
                 },
-                CompositeOperation: {
-                    items: [
-                        {
-                            "text": "source-over",
-                            "value": "source-over"
-                        },
-                        {
-                            "text": "source-in",
-                            "value": "source-in"
-                        },
-                        {
-                            "text": "source-out",
-                            "value": "source-out"
-                        },
-                        {
-                            "text": "source-atop",
-                            "value": "source-atop"
-                        },
-                        {
-                            "text": "destination-over",
-                            "value": "destination-over"
-                        },
-                        {
-                            "text": "destination-in",
-                            "value": "destination-in"
-                        },
-                        {
-                            "text": "destination-out",
-                            "value": "destination-out"
-                        },
-                        {
-                            "text": "destination-atop",
-                            "value": "destination-atop"
-                        },
-                        {
-                            "text": "lighter",
-                            "value": "lighter"
-                        },
-                        {
-                            "text": "copy",
-                            "value": "copy"
-                        },
-                        {
-                            "text": "xor",
-                            "value": "xor"
-                        },
-                        {
-                            "text": "multiply",
-                            "value": "multiply"
-                        },
-                        {
-                            "text": "screen",
-                            "value": "screen"
-                        },
-                        {
-                            "text": "overlay",
-                            "value": "overlay"
-                        },
-                        {
-                            "text": "darken",
-                            "value": "darken"
-                        },
-                        {
-                            "text": "lighten",
-                            "value": "lighten"
-                        },
-                        {
-                            "text": "color-dodge",
-                            "value": "color-dodge"
-                        },
-                        {
-                            "text": "color-burn",
-                            "value": "color-burn"
-                        },
-                        {
-                            "text": "hard-light",
-                            "value": "hard-light"
-                        },
-                        {
-                            "text": "soft-light",
-                            "value": "soft-light"
-                        },
-                        {
-                            "text": "difference",
-                            "value": "difference"
-                        },
-                        {
-                            "text": "exclusion",
-                            "value": "exclusion"
-                        },
-                        {
-                            "text": "hue",
-                            "value": "hue"
-                        },
-                        {
-                            "text": "saturation",
-                            "value": "saturation"
-                        },
-                        {
-                            "text": "color",
-                            "value": "color"
-                        },
-                        {
-                            "text": "luminosity",
-                            "value": "luminosity"
-                        }
-                    ]
+                canvasProps: {
+                    items: this.propList
                 }
             }
         };
@@ -834,7 +866,7 @@ class canvas {
                 const target = scope
                     ? this.runtime.vm.editingTarget
                     : this.runtime.getTargetForStage();
-                this.createVariable(target, null, name);
+                target.createVariable(uid(), name, 'canvas');
                 this.runtime.vm.emitWorkspaceUpdate();
             }, ScratchBlocks.Msg.VARIABLE_MODAL_TITLE, 'canvas');
     }
@@ -852,36 +884,23 @@ class canvas {
                     kind: 'input',
                     canvas: generator.descendVariable(block, 'canvas', 'canvas')
                 }),
-                setGlobalCompositeOperation: (generator, block) => ({
-                    kind: 'stack',
-                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
-                    CompositeOperation: block.fields.CompositeOperation.value
-                }),
                 setSize: (generator, block) => ({
                     kind: 'stack',
                     canvas: generator.descendVariable(block, 'canvas', 'canvas'),
                     width: generator.descendInputOfBlock(block, 'width'),
                     height: generator.descendInputOfBlock(block, 'height')
                 }),
-                setTransparency: (generator, block) => ({
+                setProperty: (generator, block) => ({
                     kind: 'stack',
-                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
-                    transparency: generator.descendInputOfBlock(block, 'transparency')
+                    isField: !!block.fields.value,
+                    prop: block.fields.prop.value,
+                    value: block.fields?.value?.value ?? generator.descendInputOfBlock(block, 'value'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
                 }),
-                setFill: (generator, block) => ({
-                    kind: 'stack',
-                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
-                    color: generator.descendInputOfBlock(block, 'color')
-                }),
-                setBorderColor: (generator, block) => ({
-                    kind: 'stack',
-                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
-                    color: generator.descendInputOfBlock(block, 'color')
-                }),
-                setBorderSize: (generator, block) => ({
-                    kind: 'stack',
-                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
-                    size: generator.descendInputOfBlock(block, 'size')
+                getProperty: (generator, block) => ({
+                    kind: 'input',
+                    prop: block.fields.prop.value,
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
                 }),
                 dash: (generator, block) => ({
                     kind: 'stack',
@@ -1023,16 +1042,19 @@ class canvas {
                 fill: (generator, block) => ({
                     kind: 'stack',
                     canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                putOntoSprite: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                getDataURI: (generator, block) => ({
+                    kind: 'input',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
                 })
             },
             js: {
-                canvasGetter: (node, compiler) => compiler.descendVariable(node.variable),
-                setGlobalCompositeOperation: (node, compiler) => {
-                    const canvas = compiler.referenceVariable(node.canvas);
-                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
-
-                    compiler.source += `${ctx}.globalCompositeOperation = '${node.CompositeOperation}';\n`;
-                },
+                canvasGetter: (node, compiler, {TypedInput, TYPE_UNKNOWN}) => 
+                    new TypedInput(compiler.referenceVariable(node.canvas), TYPE_UNKNOWN),
                 setSize: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
                     const width = compiler.descendInput(node.width).asNumber();
@@ -1041,45 +1063,70 @@ class canvas {
                     compiler.source += `${canvas}.canvas.width = ${width};\n`;
                     compiler.source += `${canvas}.canvas.height = ${height};\n`;
                 },
-                setTransparency: (node, compiler) => {
+                setProperty: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
                     const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
-                    const transparency = compiler.descendInput(node.transparency).asNumber();
+                    const val = node.isField 
+                        ? node.value
+                        : compiler.descendInput(node.value);
 
-                    compiler.source += `${ctx}.globalAlpha = ${transparency} / 100;\n`;
+                    compiler.source += `${ctx}.${node.prop} = `;
+                    const target = this.sbInfo[node.prop];
+                    switch (target.type) {
+                    case ArgumentType.STRING:
+                        compiler.source += val.asString();
+                        break;
+                    case ArgumentType.NUMBER:
+                        compiler.source += val.asNumber();
+                        break;
+                    case ArgumentType.BOOLEAN:
+                        compiler.source += val.asBoolean();
+                        break;
+                    case ArgumentType.COLOR:
+                        compiler.source += val.asString();
+                        break;
+                    default:
+                        compiler.source += `"${sanitize(val)}"`;
+                    }
+                    compiler.source += ';\n';
                 },
-                setFill: (node, compiler) => {
+                getProperty: (node, compiler, {TypedInput, TYPE_NUMBER, TYPE_STRING, TYPE_BOOLEAN, TYPE_UNKNOWN}) => {
                     const canvas = compiler.referenceVariable(node.canvas);
                     const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
-                    const color = compiler.descendInput(node.color).asColor();
 
-                    compiler.source += `${ctx}.fillStyle = ${color};\n`;
-                },
-                setBorderColor: (node, compiler) => {
-                    const canvas = compiler.referenceVariable(node.canvas);
-                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
-                    const color = compiler.descendInput(node.color).asColor();
-
-                    compiler.source += `${ctx}.strokeStyle = ${color};\n`;
-                },
-                setBorderSize: (node, compiler) => {
-                    const canvas = compiler.referenceVariable(node.canvas);
-                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
-                    const size = compiler.descendInput(node.size).asNumber();
-
-                    compiler.source += `${ctx}.fillStyle = ${size};\n`;
+                    let type = TYPE_UNKNOWN;
+                    const target = this.sbInfo[node.prop];
+                    switch (target.type) {
+                    case ArgumentType.STRING:
+                        type = TYPE_STRING;
+                        break;
+                    case ArgumentType.NUMBER:
+                        type = TYPE_NUMBER;
+                        break;
+                    case ArgumentType.BOOLEAN:
+                        type = TYPE_BOOLEAN;
+                        break;
+                    case ArgumentType.COLOR:
+                        type = TYPE_STRING;
+                        break;
+                    default:
+                        type = TYPE_STRING;
+                    }
+                    return new TypedInput(`${ctx}.${node.prop}`, type);
                 },
                 dash: (node, compiler, {ConstantInput}) => {
                     const canvas = compiler.referenceVariable(node.canvas);
                     const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
-                    const arrInp = compiler.descendInput(node.size);
-                    const isContant = arrInp instanceof ConstantInput;
+                    const arrInp = compiler.descendInput(node.dashing);
+                    const isConstant = arrInp instanceof ConstantInput;
 
                     compiler.source += `${ctx}.setLineDash(`;
-                    if (!isContant) compiler.source += `parseJSONSafe(`;
-                    compiler.source += arrInp.asColor();
-                    if (!isContant) compiler.source += ')';
-                    compiler.source += ');';
+                    if (!isConstant) compiler.source += `parseJSONSafe(`;
+                    compiler.source += isConstant 
+                        ? arrInp.constantValue
+                        : arrInp.asUnknown();
+                    if (!isConstant) compiler.source += ')';
+                    compiler.source += ');\n';
                 },
                 clearCanvas: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1087,6 +1134,7 @@ class canvas {
 
                     compiler.source += `${ctx}.clearRect(0, 0, ${canvas}.canvas.width, ${canvas}.canvas.height);\n`;
                     compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
                 },
                 clearAria: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1098,6 +1146,7 @@ class canvas {
 
                     compiler.source += `${ctx}.clearRect(${x}, ${y}, ${width}, ${height});\n`;
                     compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
                 },
                 drawRect: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1109,13 +1158,16 @@ class canvas {
 
                     compiler.source += `${ctx}.fillRect(${x}, ${y}, ${width}, ${height});\n`;
                     compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
                 },
                 preloadUriImage: (node, compiler) => {
                     const allPreloaded = compiler.evaluateOnce('{}');
                     const preloadName = compiler.descendInput(node.NAME).asString();
-                    const preloadUri = compiler.descendInput(node.URI).asUnkown();
+                    const preloadUri = compiler.descendInput(node.URI).asUnknown();
 
-                    compiler.source += `${allPreloaded}[${preloadName}] = waitPromise(resolveImageURL(${preloadUri}));\n`;
+                    compiler.source += `${allPreloaded}[${preloadName}] = yield* waitPromise(`;
+                    compiler.source += `resolveImageURL(${preloadUri})`;
+                    compiler.source += ');\n';
                 },
                 unloadUriImage: (node, compiler) => {
                     const allPreloaded = compiler.evaluateOnce('{}');
@@ -1126,38 +1178,37 @@ class canvas {
                     compiler.source += `delete ${allPreloaded}[${preloadName}];\n`;
                     compiler.source += '}';
                 },
-                getWidthOfPreloaded: (node, compiler) => {
+                getWidthOfPreloaded: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
                     const allPreloaded = compiler.evaluateOnce('{}');
                     const preloadName = compiler.descendInput(node.name).asString();
-                    return new TypedInput(`${allPreloaded}[${preloadName}].height`, TYPE_NUMBER);
+                    return new TypedInput(`${allPreloaded}[${preloadName}]?.width ?? 0`, TYPE_NUMBER);
                 },
-                getHeightOfPreloaded: (node, compiler) => {
+                getHeightOfPreloaded: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
                     const allPreloaded = compiler.evaluateOnce('{}');
                     const preloadName = compiler.descendInput(node.name).asString();
-                    return new TypedInput(`${allPreloaded}[${preloadName}].height`, TYPE_NUMBER);
+                    return new TypedInput(`${allPreloaded}[${preloadName}]?.height ?? 0`, TYPE_NUMBER);
                 },
                 drawUriImage: (node, compiler) => {
                     const allPreloaded = compiler.evaluateOnce('{}');
-                    const preloadName = compiler.descendInput(node.name).asString();
                     const canvas = compiler.referenceVariable(node.canvas);
                     const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
-                    const uri = compiler.descendInput(node.URI).asNumber();
+                    const uri = compiler.descendInput(node.URI).asUnknown();
                     const x = compiler.descendInput(node.X).asNumber();
                     const y = compiler.descendInput(node.Y).asNumber();
 
                     compiler.source += `${ctx}.drawImage(`;
-                    compiler.source += `${allPreloaded}[${preloadName}] ? `;
-                    compiler.source += `${allPreloaded}[${preloadName}] : `;
-                    compiler.source += `waitPromise(resolveImageURL(${uri}))`;
+                    compiler.source += `${allPreloaded}[${uri}]`;
+                    compiler.source += `? ${allPreloaded}[${uri}]`;
+                    compiler.source += `: yield* waitPromise(resolveImageURL(${uri}))`;
                     compiler.source += `, ${x}, ${y});\n`;
                     compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
                 },
                 drawUriImageWHR: (node, compiler) => {
                     const allPreloaded = compiler.evaluateOnce('{}');
-                    const preloadName = compiler.descendInput(node.name).asString();
                     const canvas = compiler.referenceVariable(node.canvas);
                     const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
-                    const uri = compiler.descendInput(node.URI).asNumber();
+                    const uri = compiler.descendInput(node.URI).asUnknown();
                     const x = compiler.descendInput(node.X).asNumber();
                     const y = compiler.descendInput(node.Y).asNumber();
                     const width = compiler.descendInput(node.WIDTH).asNumber();
@@ -1165,18 +1216,18 @@ class canvas {
                     const dir = compiler.descendInput(node.ROTATE).asNumber();
 
                     compiler.source += `${ctx}.drawImage(`;
-                    compiler.source += `${allPreloaded}[${preloadName}] ? `;
-                    compiler.source += `${allPreloaded}[${preloadName}] : `;
-                    compiler.source += `waitPromise(resolveImageURL(${uri}))`;
+                    compiler.source += `${allPreloaded}[${uri}] ? `;
+                    compiler.source += `${allPreloaded}[${uri}] : `;
+                    compiler.source += `yield* waitPromise(resolveImageURL(${uri}))`;
                     compiler.source += `, ${x}, ${y}, ${width}, ${height}, ${dir});\n`;
                     compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
                 },
                 drawUriImageWHCX1Y1X2Y2R: (node, compiler) => {
                     const allPreloaded = compiler.evaluateOnce('{}');
-                    const preloadName = compiler.descendInput(node.name).asString();
                     const canvas = compiler.referenceVariable(node.canvas);
                     const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
-                    const uri = compiler.descendInput(node.URI).asNumber();
+                    const uri = compiler.descendInput(node.URI).asUnknown();
                     const x = compiler.descendInput(node.X).asNumber();
                     const y = compiler.descendInput(node.Y).asNumber();
                     const width = compiler.descendInput(node.WIDTH).asNumber();
@@ -1188,12 +1239,13 @@ class canvas {
                     const cropHeight = compiler.descendInput(node.CROPH).asNumber();
 
                     compiler.source += `${ctx}.drawImage(`;
-                    compiler.source += `${allPreloaded}[${preloadName}] ? `;
-                    compiler.source += `${allPreloaded}[${preloadName}] : `;
-                    compiler.source += `waitPromise(resolveImageURL(${uri}))`;
+                    compiler.source += `${allPreloaded}[${uri}] ? `;
+                    compiler.source += `${allPreloaded}[${uri}] : `;
+                    compiler.source += `yield* waitPromise(resolveImageURL(${uri}))`;
                     compiler.source += `, ${x}, ${y}, ${width}, ${height}, ${dir}, `;
                     compiler.source += `${cropX}, ${cropY}, ${cropWidth}, ${cropHeight});\n`;
                     compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
                 },
                 getWidthOfCanvas: (node, compiler, {TYPE_NUMBER, TypedInput}) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1254,7 +1306,8 @@ class canvas {
                     const height = compiler.descendInput(node.height).asNumber();
                     const dir = compiler.descendInput(node.dir).asNumber();
 
-                    compiler.source += `${ctx}.ellipse(${x}, ${y}, ${width}, ${height}, ${dir} * Math.PI / 180, 0, 2 * Math.PI);\n`;
+                    compiler.source += `${ctx}.ellipse(${x}, ${y}, ${width}, ${height}`;
+                    compiler.source += `, ${dir} * Math.PI / 180, 0, 2 * Math.PI);\n`;
                 },
                 addEllipseStartStop: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1267,7 +1320,8 @@ class canvas {
                     const start = compiler.descendInput(node.start).asNumber();
                     const end = compiler.descendInput(node.end).asNumber();
 
-                    compiler.source += `${ctx}.ellipse(${x}, ${y}, ${width}, ${height}, ${dir} * Math.PI / 180, ${start} * Math.PI / 180, ${end} * Math.PI / 180);\n`;
+                    compiler.source += `${ctx}.ellipse(${x}, ${y}, ${width}, ${height}, `;
+                    compiler.source += `${dir} * Math.PI / 180, ${start} * Math.PI / 180, ${end} * Math.PI / 180);\n`;
                 },
                 closePath: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1281,6 +1335,7 @@ class canvas {
 
                     compiler.source += `${ctx}.stroke();\n`;
                     compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
                 },
                 fill: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1288,125 +1343,41 @@ class canvas {
 
                     compiler.source += `${ctx}.fill();\n`;
                     compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                }                
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                },
+                putOntoSprite: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+
+                    compiler.source += `${canvas}.applyCanvasToTarget(target);\n`;
+                },
+                getDataURI: (node, compiler, {TypedInput, TYPE_STRING}) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    return new TypedInput(`${canvas}.toString()`, TYPE_STRING);
+                }
             }
         };
     }
 
+    getOrCreateVariable(target, id, name) {
+        const variable = target.variables[id];
+        if (!variable) {
+            target.createVariable(id, name);
+        }
+    }
+    // display monitors
     canvasGetter(args, util) {
         const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
         return canvasObj;
     }
-
-    setGlobalCompositeOperation(args, util) {
+    getProperty(args, util) {
         const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
         const ctx = canvasObj.canvas.getContext('2d');
-        ctx.globalCompositeOperation = args.CompositeOperation;
-    }
 
-    setBorderColor(args, util) {
-        const color = args.color;
+        return ctx[args.prop];
+    }
+    getDataURI(args, util) {
         const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
-        const ctx = canvasObj.canvas.getContext('2d');
-        ctx.strokeStyle = color;
-    }
-
-    setBorderSize(args, util) {
-        const size = args.size;
-        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
-        const ctx = canvasObj.canvas.getContext('2d');
-        ctx.lineSize = size;
-    }
-
-    setFill(args, util) {
-        const color = args.color;
-        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
-        const ctx = canvasObj.canvas.getContext('2d');
-        ctx.fillStyle = color;
-    }
-
-    setSize(args, util) {
-        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
-        canvasObj.size = [args.width, args.height];
-    }
-
-    drawRect(args, util) {
-        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
-        const ctx = canvasObj.canvas.getContext('2d');
-        ctx.fillRect(args.x, args.y, args.width, args.height);
-    }
-
-    async _drawUriImage({canvas, URI, X, Y, WIDTH, HEIGHT, ROTATE, CROPX, CROPY, CROPW, CROPH}, target) {
-        const canvasObj = this.getOrCreateVariable(target, canvas.id, canvas.name);
-        const image = this.preloadedImages[URI] ?? (URI instanceof CanvasVar
-            ? URI.canvas
-            : await new Promise((resolve, reject) => {
-                const image = new Image();
-                image.onload = () => resolve(image);
-                image.onerror = err => reject(err);
-                image.src = URI;
-            }));
-        const ctx = canvasObj.canvas.getContext('2d');
-        ctx.rotate(MathUtil.degToRad(ROTATE - 90));
-
-        // use sizes from the image if none specified
-        const width = WIDTH ?? image.width;
-        const height = HEIGHT ?? image.height;
-        const drawArgs = [CROPX, CROPY, CROPW, CROPH, X, Y, width, height];
-
-        // if cropx or cropy are undefined then remove the crop args
-        if (typeof (CROPX ?? CROPY) === "undefined") {
-            drawArgs.splice(0, 4);
-        }
-
-        ctx.drawImage(image, ...drawArgs);
-    }
-
-    // todo: should these be merged into their own function? they all have the same code...
-    drawUriImage (args, util) {
-        const preloaded = this.preloadedImages[args.URI];
-        const possiblePromise = this._drawUriImage(args, util.target);
-        if (!preloaded && !(args.URI instanceof CanvasVar)) {
-            return possiblePromise;
-        }
-    }
-    drawUriImageWHR (args, util) {
-        const preloaded = this.preloadedImages[args.URI];
-        const possiblePromise = this._drawUriImage(args, util.target);
-        if (!preloaded && !(args.URI instanceof CanvasVar)) {
-            return possiblePromise;
-        }
-    }
-    drawUriImageWHCX1Y1X2Y2R (args, util) {
-        const preloaded = this.preloadedImages[args.URI];
-        const possiblePromise = this._drawUriImage(args, util.target);
-        if (!preloaded && !(args.URI instanceof CanvasVar)) {
-            return possiblePromise;
-        }
-    }
-
-    preloadUriImage ({ URI, NAME }) {
-        // just incase the user tries to preload a canvas, dont use the canvases data uri
-        if (URI instanceof CanvasVar) {
-            this.preloadedImages[NAME] = URI.canvas;
-            return;
-        }
-        return new Promise(resolve => {
-            const image = new Image();
-            image.crossOrigin = "anonymous";
-            image.onload = () => {
-                this.preloadedImages[NAME] = image;
-                resolve();
-            };
-            image.onerror = resolve; // ignore loading errors lol!
-            image.src = URI;
-        });
-    }
-    unloadUriImage ({ NAME }) {
-        if (this.preloadedImages.hasOwnProperty(NAME)) {
-            this.preloadedImages[NAME].remove();
-            delete this.preloadedImages[NAME];
-        }
+        return canvasObj.toString();
     }
     getWidthOfPreloaded ({ name }) {
         if (!this.preloadedImages.hasOwnProperty(name)) return 0;
@@ -1416,25 +1387,6 @@ class canvas {
         if (!this.preloadedImages.hasOwnProperty(name)) return 0;
         return this.preloadedImages[name].height;
     }
-
-    clearAria(args, util) {
-        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
-        const ctx = canvasObj.canvas.getContext('2d');
-        ctx.clearRect(args.x, args.y, args.width, args.height);
-    }
-
-    clearCanvas(args, util) {
-        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
-        const ctx = canvasObj.canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvasObj.size[0], canvasObj.size[1]);
-    }
-
-    setTransparency(args, util) {
-        const canvasObj = this.getOrCreateVariable(util.target, args.canvas.id, args.canvas.name);
-        const ctx = canvasObj.canvas.getContext('2d');
-        ctx.globalAlpha = args.transparency / 100;
-    }
-
     getWidthOfCanvas({ canvas }, util) {
         const canvasObj = this.getOrCreateVariable(util.target, canvas.id, canvas.name);
         return canvasObj.size[0];

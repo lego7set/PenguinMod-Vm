@@ -38,6 +38,11 @@ const Touch = require('../io/touch');
 const StringUtil = require('../util/string-util');
 const uid = require('../util/uid');
 
+const coreVariableTypes = [
+    Variable.SCALAR_TYPE,
+    Variable.LIST_TYPE,
+    Variable.BROADCAST_MESSAGE_TYPE
+];
 const defaultBlockPackages = {
     scratch3_control: require('../blocks/scratch3_control'),
     scratch3_event: require('../blocks/scratch3_event'),
@@ -579,6 +584,9 @@ class Runtime extends EventEmitter {
 
         // it back
         this.on('RUNTIME_STEP_START', () => this.emit('BEFORE_EXECUTE'));
+
+        // list of variable types declared by extensions
+        this._extensionVariables = {};
     }
 
     /**
@@ -1358,6 +1366,7 @@ class Runtime extends EventEmitter {
                 case 'string':
                     return [formattedItem, formattedItem];
                 case 'object':
+                    if (Array.isArray(item)) return item.slice(0, 2);
                     return [maybeFormatMessage(item.text, extensionMessageContext), item.value];
                 default:
                     throw new Error(`Can't interpret menu item: ${JSON.stringify(item)}`);
@@ -1838,9 +1847,11 @@ class Runtime extends EventEmitter {
                 } else if (typeof menuInfo.variableType === 'string') {
                     const args = Object.keys(context.blockInfo.arguments);
                     const blockText = context.blockInfo.text.toString();
-                    const isVariableGetter = args.length === 1 && blockText.length === args[0].length + 2
-                    context.blockJSON.extensions ??= [];
-                    context.blockJSON.extensions.push('contextMenu_getVariableBlockAnyType');
+                    const isVariableGetter = args.length === 1 && blockText.length === args[0].length + 2;
+                    if (isVariableGetter) {
+                        context.blockJSON.extensions ??= [];
+                        context.blockJSON.extensions.push('contextMenu_getVariableBlockAnyType');
+                    }
                     argJSON.type = isVariableGetter
                         ? 'field_variable_getter'
                         : 'field_variable';
@@ -2121,6 +2132,44 @@ class Runtime extends EventEmitter {
         this.renderer.setLayerGroupOrdering(StageLayering.LAYER_GROUPS);
         this.renderer.offscreenTouching = !this.runtimeOptions.fencing;
         this.updatePrivacy();
+    }
+
+    /**
+     * Register a variable type
+     * @param {string} type the type name of this variable
+     * @param {ObjectConstructor} varClass the class to handle the data this variable contains
+     */
+    registerVariable (type, varClass) {
+        this._extensionVariables[type] = varClass;
+    }
+
+    /**
+     * Remove a variable type
+     * @param {string} type the type name of this variable
+     */
+    unregisterVariable (type) {
+        delete this._extensionVariables[type];
+    }
+
+    /**
+     * create a new variable instance
+     * @param {string} type variable type
+     * @param  {...any} args the arguments to pass down to the variable
+     * @returns {Variable|InstanceType} the new variable instance
+     */
+    newVariableInstance (type, ...args) {
+        if (coreVariableTypes.includes(type)) {
+            args.splice(2, 0, type);
+            return new Variable(...args);
+        }
+        const variable = this._extensionVariables[type];
+        // return a fake variable, this is because of loading variables from the sb3 parser
+        if (!variable) return {
+            type,
+            value: args,
+            mustRecreate: true
+        };
+        return new variable(this, ...args);
     }
 
     /**
@@ -2497,6 +2546,19 @@ class Runtime extends EventEmitter {
      * @param {Target} target target to add
      */
     addTarget (target) {
+        for (const varId in target.variables) {
+            const variable = target.variables[varId];
+            if (variable.mustRecreate) {
+                // variable must be fully created now as we couldnt earlier
+                const newVar = this.newVariableInstance(variable.type, ...variable.value);
+                // variable type doesnt exist, remove variable entirely
+                if (newVar.mustRecreate) {
+                    delete target.variable[varId];
+                    continue;
+                }
+                target.variables[varId] = newVar;
+            }
+        }
         this.targets.push(target);
         this.executableTargets.push(target);
         if (target.isStage && !this._stageTarget) {
@@ -3598,7 +3660,8 @@ class Runtime extends EventEmitter {
         const varType = (typeof optVarType === 'string') ? optVarType : Variable.SCALAR_TYPE;
         const allVariableNames = this.getAllVarNamesOfType(varType);
         const newName = StringUtil.unusedName(variableName, allVariableNames);
-        const variable = new Variable(optVarId || uid(), newName, varType);
+
+        const variable = this.newVariableInstance(varType, optVarId || uid(), newName);
         const stage = this.getTargetForStage();
         stage.variables[variable.id] = variable;
         return variable;

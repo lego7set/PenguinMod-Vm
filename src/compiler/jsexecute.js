@@ -600,9 +600,9 @@ runtimeFunctions.resolveImageURL = `const resolveImageURL = imgURL =>
         : new Promise(resolve => {
             const image = new Image();
             image.crossOrigin = "anonymous";
-            image.onload = resolve(''+image);
+            image.onload = resolve(image);
             image.onerror = resolve; // ignore loading errors lol!
-            image.src = imgURL;
+            image.src = ''+imgURL;
         })`;
 
 runtimeFunctions.parseJSONSafe = `const parseJSONSafe = json => {

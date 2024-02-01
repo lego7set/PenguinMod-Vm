@@ -1926,7 +1926,7 @@ class ScriptTreeGenerator {
         }
 
         // Create it locally...
-        const newVariable = new Variable(id, name, type, false);
+        const newVariable = this.runtime.newVariableInstance(type, id, name, false);
         target.variables[id] = newVariable;
 
         if (target.sprite) {
@@ -1935,7 +1935,7 @@ class ScriptTreeGenerator {
             // sprite.clones has all instances of this sprite including the original and all clones
             for (const clone of target.sprite.clones) {
                 if (!clone.variables.hasOwnProperty(id)) {
-                    clone.variables[id] = new Variable(id, name, type, false);
+                    clone.variables[id] = this.runtime.newVariableInstance(type, id, name, false);
                 }
             }
         }

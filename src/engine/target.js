@@ -265,7 +265,7 @@ class Target extends EventEmitter {
      */
     createVariable (id, name, type, isCloud) {
         if (!this.variables.hasOwnProperty(id)) {
-            const newVariable = new Variable(id, name, type, false);
+            const newVariable = this.runtime.newVariableInstance(type, id, name, false);
             if (isCloud && this.isStage && this.runtime.canAddCloudVariable()) {
                 newVariable.isCloud = true;
                 this.runtime.addCloudVariable();
@@ -410,10 +410,10 @@ class Target extends EventEmitter {
     duplicateVariable (id, optKeepOriginalId) {
         if (this.variables.hasOwnProperty(id)) {
             const originalVariable = this.variables[id];
-            const newVariable = new Variable(
+            const newVariable = this.runtime.newVariableInstance(
+                originalVariable.type,
                 optKeepOriginalId ? id : null, // conditionally keep original id or generate a new one
                 originalVariable.name,
-                originalVariable.type,
                 originalVariable.isCloud
             );
             if (newVariable.type === Variable.LIST_TYPE) {
@@ -595,7 +595,7 @@ class Target extends EventEmitter {
         if (existingLocalVar) {
             newVarId = existingLocalVar.id;
         } else {
-            const newVar = new Variable(null, varName, varType);
+            const newVar = this.runtime.newVariableInstance(varType, null, varName);
             newVarId = newVar.id;
             sprite.variables[newVarId] = newVar;
         }

@@ -1,4 +1,5 @@
 const xmlEscape = require('../../util/xml-escape');
+const uid = require('../../util/uid');
 
 class CanvasVar {
     /**
@@ -9,7 +10,7 @@ class CanvasVar {
      * @param {[number,number]|string|Image} [img=[1, 1]] optionally the image to be loaded into this canvas
      */
     constructor (runtime, id, name, img = [1, 1]) {
-        this.id = id;
+        this.id = id ?? uid();
         this.name = name;
         this.type = 'canvas';
         this.runtime = runtime;
@@ -85,11 +86,12 @@ class CanvasVar {
     }
 
     updateCanvasSkin() {
-        this.renderer.updateBitmapSkin(this.canvas);
+        this.renderer.updateBitmapSkin(this._skinId, this.canvas);
     }
 
     applyCanvasToTarget(target) {
-        this.renderer.updateDrawableSkinId(target.drawableId, this._skinId);
+        this.renderer.updateDrawableSkinId(target.drawableID, this._skinId);
+        this.runtime.requestRedraw();
     }
 }
 

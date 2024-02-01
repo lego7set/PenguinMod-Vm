@@ -638,6 +638,7 @@ const serializeVariables = function (variables) {
     obj.variables = Object.create(null);
     obj.lists = Object.create(null);
     obj.broadcasts = Object.create(null);
+    obj.customVars = [];
     for (const varId in variables) {
         const v = variables[varId];
         if (v.type === Variable.BROADCAST_MESSAGE_TYPE) {
@@ -648,11 +649,15 @@ const serializeVariables = function (variables) {
             obj.lists[varId] = [v.name, makeSafeForJSON(v.value)];
             continue;
         }
-
-        // otherwise should be a scalar type
-        obj.variables[varId] = [v.name, makeSafeForJSON(v.value)];
-        // only scalar vars have the potential to be cloud vars
-        if (v.isCloud) obj.variables[varId].push(true);
+        if (v.type === Variable.SCALAR_TYPE) {
+            obj.variables[varId] = [v.name, makeSafeForJSON(v.value)];
+            if (v.isCloud) obj.variables[varId].push(true);
+            continue;
+        }
+        // else custom variable type
+        const varInfo = v.serialize();
+        varInfo.unshift(v.type);
+        obj.customVars.push(varInfo);
     }
     return obj;
 };
@@ -692,6 +697,7 @@ const serializeTarget = function (target) {
     obj.variables = vars.variables;
     obj.lists = vars.lists;
     obj.broadcasts = vars.broadcasts;
+    obj.customVars = vars.customVars;
     obj.blocks = serializeBlocks(target.blocks);
     obj.comments = serializeComments(target.comments);
 
@@ -704,6 +710,7 @@ const serializeTarget = function (target) {
     obj.currentCostume = target.currentCostume;
     obj.costumes = target.costumes.map(serializeCostume);
     obj.sounds = target.sounds.map(serializeSound);
+    obj.id = target.id;
     if (target.hasOwnProperty('volume')) obj.volume = target.volume;
     if (target.hasOwnProperty('layerOrder')) obj.layerOrder = target.layerOrder;
     if (obj.isStage) { // Only the stage should have these properties
@@ -1325,6 +1332,13 @@ const parseScratchObject = function (object, runtime, extensions, zip, assets) {
             target.variables[newBroadcast.id] = newBroadcast;
         }
     }
+    if (object.hasOwnProperty('customVars')) {
+        for (const info of object.customVars) {
+            // im lay z so customVars is just a list of arg lists to be passed into the variable creator
+            const newVar = runtime.newVariableInstance(...info);
+            target.variables[newVar.id] = newVar;
+        }
+    }
     if (object.hasOwnProperty('comments')) {
         for (const commentId in object.comments) {
             const comment = object.comments[commentId];
@@ -1375,6 +1389,9 @@ const parseScratchObject = function (object, runtime, extensions, zip, assets) {
     }
     if (object.hasOwnProperty('draggable')) {
         target.draggable = object.draggable;
+    }
+    if (object.hasOwnProperty('id')) {
+        target.id = object.id;
     }
     Promise.all(costumePromises).then(costumes => {
         sprite.costumes = costumes;

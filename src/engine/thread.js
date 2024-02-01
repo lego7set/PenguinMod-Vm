@@ -517,7 +517,7 @@ class Thread {
         for (const procedureCode of Object.keys(result.procedures)) {
             this.procedures[procedureCode] = result.procedures[procedureCode](this);
         }
-
+        
         this.generator = result.startingFunction(this)();
 
         this.executableHat = result.executableHat;
