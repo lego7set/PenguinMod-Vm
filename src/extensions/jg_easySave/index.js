@@ -31,7 +31,7 @@ class jgEasySaveBlocks {
                 },
                 {
                     opcode: 'addVarToSave',
-                    text: 'add variable [VAR] to save',
+                    text: 'add value of variable [VAR] to save',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         VAR: {
@@ -41,7 +41,7 @@ class jgEasySaveBlocks {
                 },
                 {
                     opcode: 'addListToSave',
-                    text: 'add list [LIST] to save',
+                    text: 'add value of list [LIST] to save',
                     blockType: BlockType.COMMAND,
                     arguments: {
                         LIST: {
@@ -56,18 +56,57 @@ class jgEasySaveBlocks {
             ],
             menus: {
                 variable: {
-                    items: [],
-                    variableType: "scalar"
+                    acceptReporters: false,
+                    items: "getVariables",
                 },
                 list: {
-                    items: [],
-                    variableType: "list"
+                    acceptReporters: false,
+                    items: "getLists",
                 },
             }
         };
     }
 
-    
+    getVariables() {
+        const variables =
+            // @ts-expect-error
+            typeof Blockly === "undefined"
+                ? []
+                : // @ts-expect-error
+                Blockly.getMainWorkspace()
+                    .getVariableMap()
+                    .getVariablesOfType("")
+                    .map((model) => ({
+                        text: model.name,
+                        value: model.getId(),
+                    }));
+        if (variables.length > 0) {
+            return variables;
+        } else {
+            return [{ text: "", value: "" }];
+        }
+    }
+    getLists() {
+        // using blockly causes unstable behavior
+        // https://discord.com/channels/1033551490331197462/1038251742439149661/1202846831994863627
+        const globalLists = Object.values(this.runtime.getTargetForStage().variables)
+            .filter((x) => x.type == "list");
+        const localLists = Object.values(this.runtime.vm.editingTarget.variables)
+            .filter((x) => x.type == "list");
+        const uniqueLists = [...new Set([...globalLists, ...localLists])];
+        if (uniqueLists.length === 0) return [{ text: "", value: "" }];
+        return uniqueLists.map((i) => ({ text: i.name, value: i.id }));
+    }
+
+    addVarToSave(args, util) {
+        const variable = util.target.lookupVariableById(args.VAR);
+        console.log(variable);
+    }
+    addListToSave(args, util) {
+        console.log(args.LIST);
+        const variable = util.target.lookupVariableById(args.LIST);
+        console.log(variable);
+    }
 }
 
 module.exports = jgEasySaveBlocks;
