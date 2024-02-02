@@ -2732,8 +2732,6 @@ class Runtime extends EventEmitter {
         }
 
         this.ioDevices.clock.pause();
-        // safest way to stop the threads from being steped /shrug
-        this.frameLoop.stop();
         for (const thread of this.threads) {
             thread.pause();
         }
@@ -2760,8 +2758,6 @@ class Runtime extends EventEmitter {
         }
 
         this.ioDevices.clock.resume();
-        // frameloop is always stoped by pause() so restart it
-        this.frameLoop.start();
         for (const thread of this.threads) {
             thread.play();
         }
