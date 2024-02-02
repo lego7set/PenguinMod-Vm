@@ -72,6 +72,7 @@ class tempVars {
                             defaultValue: 'Variable'
                         }
                     },
+                    allowDropAnywhere: true,
                     blockType: BlockType.REPORTER
                 },
                 '---',
