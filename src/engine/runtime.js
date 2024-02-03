@@ -1416,12 +1416,12 @@ class Runtime extends EventEmitter {
                 outputShape: menuInfo.acceptReporters || menuInfo.isTypeable ?
                     ScratchBlocksConstants.OUTPUT_SHAPE_ROUND : ScratchBlocksConstants.OUTPUT_SHAPE_SQUARE,
                 args0: [
-                    (typeof menuInfo.variableType === 'string' ? 
+                    (typeof menuInfo.variableType !== 'undefined' ? 
                         {
                             type: 'field_variable',
                             name: menuName,
                             variableTypes: [menuInfo.variableType === 'scalar' 
-                                ? '' 
+                                ? Variable.SCALAR_TYPE 
                                 : menuInfo.variableType]
                         } : (menuInfo.isTypeable ? 
                             {
@@ -1853,7 +1853,7 @@ class Runtime extends EventEmitter {
                     valueName = placeholder;
                     shadowType = this._makeExtensionMenuId(argInfo.menu, context.categoryInfo.id);
                     fieldName = argInfo.menu;
-                } else if (typeof menuInfo.variableType === 'string') {
+                } else if (typeof menuInfo.variableType !== 'undefined') {
                     const args = Object.keys(context.blockInfo.arguments);
                     const blockText = context.blockInfo.text.toString();
                     const isVariableGetter = args.length === 1 && blockText.length === args[0].length + 2;
@@ -1865,7 +1865,7 @@ class Runtime extends EventEmitter {
                         ? 'field_variable_getter'
                         : 'field_variable';
                     argJSON.variableTypes = [menuInfo.variableType === 'scalar' 
-                        ? '' 
+                        ? Variable.SCALAR_TYPE 
                         : menuInfo.variableType];
                     argJSON.variableType = argJSON.variableTypes[0];
                     valueName = null;
@@ -2157,6 +2157,8 @@ class Runtime extends EventEmitter {
      * @param {string} type the type name of this variable
      */
     unregisterVariable (type) {
+        const variable = this._extensionVariables[type];
+        if (!variable) throw new Error(`can not remove a variable type that does not exist. removing ${type}`);
         delete this._extensionVariables[type];
     }
 
