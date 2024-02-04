@@ -1981,8 +1981,8 @@ class Runtime extends EventEmitter {
                 statusButtonXML = 'showStatusButton="true"';
             }
 
-            let xml = `<category name="${xmlEscape(name)}"`;
-            xml += ` id="${xmlEscape(categoryInfo.id)}"`;
+            let xml = `<category name="${xmlEscape.escapeAttribute(name)}"`;
+            xml += ` id="${xmlEscape.escapeAttribute(categoryInfo.id)}"`;
             xml += ` options="extensionControls"`;
             xml += ` ${statusButtonXML}`;
             xml += ` ${colorXML}`;

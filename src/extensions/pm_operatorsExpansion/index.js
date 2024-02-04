@@ -7,6 +7,13 @@ const Cast = require('../../util/cast');
 const blockSeparator = '<sep gap="36"/>'; // At default scale, about 28px
 
 const blocks = `
+%b26> ` +/* left shift */`
+%b27> ` +/* right shift */`
+%b28> ` +/* binnary and */`
+%b29> ` +/* binnary or */`
+%b30> ` +/* binnary xor */`
+%b31> ` +/* binnary not */`
+${blockSeparator}
 <block type="operator_randomBoolean" />
 ${blockSeparator}
 <block type="operator_nand" />
@@ -14,7 +21,7 @@ ${blockSeparator}
 <block type="operator_xor" />
 <block type="operator_xnor" />
 ${blockSeparator}
-%b20> `+/* evaluate math expression */`
+%b20> ` +/* evaluate math expression */`
 <block type="operator_countAppearTimes">
     <value name="TEXT1">
         <shadow type="text">
@@ -52,12 +59,12 @@ ${blockSeparator}
     </value>
 </block>
 ${blockSeparator}
-%b21> `+/* set replacer */`
-%b22> `+/* reset replacers */`
-%b23> `+/* use replacers */`
+%b21> ` +/* set replacer */`
+%b22> ` +/* reset replacers */`
+%b23> ` +/* use replacers */`
 ${blockSeparator}
-%b24> `+/* text after () in () */`
-%b25> `+/* text before () in () */`
+%b24> ` +/* text after () in () */`
+%b25> ` +/* text before () in () */`
 <block type="operator_character_to_code">
     <value name="ONE">
         <shadow type="text">
@@ -73,23 +80,23 @@ ${blockSeparator}
     </value>
 </block>
 ${blockSeparator}
-`+/* new blocks */`
-%b18> `+/* exactly equals */`
+` +/* new blocks */`
+%b18> ` +/* exactly equals */`
 ${blockSeparator}
-%b6> `+/* part of ratio */`
-%b7> `+/* simplify of ratio */`
+%b6> ` +/* part of ratio */`
+%b7> ` +/* simplify of ratio */`
 ${blockSeparator}
-%b12> `+/* is number multiple of number */`
-%b15> `+/* is number even */`
-%b13> `+/* is number int */`
-%b14> `+/* is number prime */`
-%b19> `+/* is number between numbers */`
-%b11> `+/* trunc number */`
+%b12> ` +/* is number multiple of number */`
+%b15> ` +/* is number even */`
+%b13> ` +/* is number int */`
+%b14> ` +/* is number prime */`
+%b19> ` +/* is number between numbers */`
+%b11> ` +/* trunc number */`
 ${blockSeparator}
-%b16> `+/* reverse text */`
-%b17> `+/* shuffle text */`
+%b16> ` +/* reverse text */`
+%b17> ` +/* shuffle text */`
 ${blockSeparator}
-`+/* join blocks */`
+` +/* join blocks */`
 <block type="operator_join">
     <value name="STRING1">
         <shadow type="text">
@@ -119,18 +126,18 @@ ${blockSeparator}
         </shadow>
     </value>
 </block>
-`+/* extreme join blocks */`
+` +/* extreme join blocks */`
 %b0>
 %b1>
 %b2>
 %b3>
 %b4>
 %b5>
-`+/* constants */`
+` +/* constants */`
 ${blockSeparator}
-%b8> `+/* pi */`
-%b9> `+/* euler */`
-%b10> `+/* inf */`
+%b8> ` +/* pi */`
+%b9> ` +/* euler */`
+%b10> ` +/* inf */`
 ${blockSeparator}
 `;
 
@@ -146,21 +153,21 @@ function generateJoin(amount) {
         'pineapple',
         'grape',
         'kiwi'
-    ]
+    ];
 
     const argumentTextArray = [];
     const argumentss = {};
 
     for (let i = 0; i < amount; i++) {
-        argumentTextArray.push('[STRING' + (i + 1) + ']');
-        argumentss['STRING' + (i + 1)] = {
+        argumentTextArray.push(`[STRING${i + 1}]`);
+        argumentss[`STRING${i + 1}`] = {
             type: ArgumentType.STRING,
             defaultValue: joinWords[i] + ((i === (amount - 1)) ? '' : ' ')
-        }
+        };
     }
 
-    const opcode = 'join' + amount;
-    const defaultText = 'join ' + argumentTextArray.join(' ');
+    const opcode = `join${amount}`;
+    const defaultText = `join ${argumentTextArray.join(' ')}`;
 
     return {
         opcode: opcode,
@@ -173,16 +180,16 @@ function generateJoin(amount) {
 
 function generateJoinTranslations(amount, word, type) {
     switch (type) {
-        case 1:
-            const obj = {};
-            for (let i = 0; i < amount; i++) {
-                let text = `${word} `;
-                for (let j = 0; j < amount; j++) {
-                    text += `[STRING${j + 1}]`;
-                }
-                obj[`join${i + 1}`] = text;
+    case 1:
+        const obj = {};
+        for (let i = 0; i < amount; i++) {
+            let text = `${word} `;
+            for (let j = 0; j < amount; j++) {
+                text += `[STRING${j + 1}]`;
             }
-            return obj;
+            obj[`join${i + 1}`] = text;
+        }
+        return obj;
     }
 }
 
@@ -206,6 +213,7 @@ class pmOperatorsExpansion {
             }
         });
         this.replacers = Object.create({});
+        this.runtime.registerCompiledExtensionBlocks('pmOperatorsExpansion', this.getCompileInfo());
     }
 
     orderCategoryBlocks(extensionBlocks) {
@@ -213,7 +221,7 @@ class pmOperatorsExpansion {
 
         let idx = 0;
         for (const block of extensionBlocks) {
-            categoryBlocks = categoryBlocks.replace('%b' + idx + '>', block);
+            categoryBlocks = categoryBlocks.replace(`%b${idx}>`, block);
             idx++;
         }
 
@@ -310,7 +318,7 @@ class pmOperatorsExpansion {
                         MULTIPLE: {
                             type: ArgumentType.NUMBER,
                             defaultValue: "10"
-                        },
+                        }
                     }
                 },
                 {
@@ -322,7 +330,7 @@ class pmOperatorsExpansion {
                         NUM: {
                             type: ArgumentType.NUMBER,
                             defaultValue: "0.5"
-                        },
+                        }
                     }
                 },
                 {
@@ -334,7 +342,7 @@ class pmOperatorsExpansion {
                         NUM: {
                             type: ArgumentType.NUMBER,
                             defaultValue: "13"
-                        },
+                        }
                     }
                 },
                 {
@@ -346,7 +354,7 @@ class pmOperatorsExpansion {
                         NUM: {
                             type: ArgumentType.NUMBER,
                             defaultValue: "4"
-                        },
+                        }
                     }
                 },
                 {
@@ -358,7 +366,7 @@ class pmOperatorsExpansion {
                         TEXT: {
                             type: ArgumentType.STRING,
                             defaultValue: "Hello!"
-                        },
+                        }
                     }
                 },
                 {
@@ -370,7 +378,7 @@ class pmOperatorsExpansion {
                         TEXT: {
                             type: ArgumentType.STRING,
                             defaultValue: "Hello!"
-                        },
+                        }
                     }
                 },
                 {
@@ -386,7 +394,7 @@ class pmOperatorsExpansion {
                         TWO: {
                             type: ArgumentType.STRING,
                             defaultValue: "b"
-                        },
+                        }
                     }
                 },
                 {
@@ -406,7 +414,7 @@ class pmOperatorsExpansion {
                         MAX: {
                             type: ArgumentType.NUMBER,
                             defaultValue: 10
-                        },
+                        }
                     }
                 },
                 {
@@ -418,7 +426,7 @@ class pmOperatorsExpansion {
                         EQUATION: {
                             type: ArgumentType.STRING,
                             defaultValue: "5 * 2"
-                        },
+                        }
                     }
                 },
                 {
@@ -433,7 +441,7 @@ class pmOperatorsExpansion {
                         TEXT: {
                             type: ArgumentType.STRING,
                             defaultValue: "world"
-                        },
+                        }
                     }
                 },
                 {
@@ -450,7 +458,7 @@ class pmOperatorsExpansion {
                         TEXT: {
                             type: ArgumentType.STRING,
                             defaultValue: "Hello ${replacer}!"
-                        },
+                        }
                     }
                 },
                 {
@@ -466,7 +474,7 @@ class pmOperatorsExpansion {
                         BASE: {
                             type: ArgumentType.STRING,
                             defaultValue: "Hello world!"
-                        },
+                        }
                     }
                 },
                 {
@@ -482,9 +490,101 @@ class pmOperatorsExpansion {
                         BASE: {
                             type: ArgumentType.STRING,
                             defaultValue: "Hello world!"
-                        },
+                        }
                     }
                 },
+                {
+                    opcode: 'shiftLeft',
+                    text: '[num1] << [num2]',
+                    blockType: BlockType.REPORTER,
+                    disableMonitor: true,
+                    arguments: {
+                        num1: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "1"
+                        },
+                        num2: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "5"
+                        }
+                    }
+                },
+                {
+                    opcode: 'shiftRight',
+                    text: '[num1] >> [num2]',
+                    blockType: BlockType.REPORTER,
+                    disableMonitor: true,
+                    arguments: {
+                        num1: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "32"
+                        },
+                        num2: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "5"
+                        }
+                    }
+                },
+                {
+                    opcode: 'binnaryAnd',
+                    text: '[num1] & [num2]',
+                    blockType: BlockType.REPORTER,
+                    disableMonitor: true,
+                    arguments: {
+                        num1: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "32"
+                        },
+                        num2: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "5"
+                        }
+                    }
+                },
+                {
+                    opcode: 'binnaryOr',
+                    text: '[num1] | [num2]',
+                    blockType: BlockType.REPORTER,
+                    disableMonitor: true,
+                    arguments: {
+                        num1: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "7"
+                        },
+                        num2: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "8"
+                        }
+                    }
+                },
+                {
+                    opcode: 'binnaryXor',
+                    text: '[num1] ^ [num2]',
+                    blockType: BlockType.REPORTER,
+                    disableMonitor: true,
+                    arguments: {
+                        num1: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "7"
+                        },
+                        num2: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "2"
+                        }
+                    }
+                },
+                {
+                    opcode: 'binnaryNot',
+                    text: '~ [num1]',
+                    blockType: BlockType.REPORTER,
+                    disableMonitor: true,
+                    arguments: {
+                        num1: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: "2"
+                        }
+                    }
+                }
             ],
             menus: {
                 part: {
@@ -493,6 +593,85 @@ class pmOperatorsExpansion {
                         "first",
                         "last"
                     ].map(item => ({ text: item, value: item }))
+                }
+            }
+        };
+    }
+
+    /**
+     * This function is used for any compiled blocks in the extension if they exist.
+     * Data in this function is given to the IR & JS generators.
+     * Data must be valid otherwise errors may occur.
+     * @returns {object} functions that create data for compiled blocks.
+     */
+    getCompileInfo() {
+        return {
+            ir: {
+                shiftLeft: (generator, block) => ({
+                    kind: 'input',
+                    num1: generator.descendInputOfBlock(block, 'num1'),
+                    num2: generator.descendInputOfBlock(block, 'num2')
+                }),
+                shiftRight: (generator, block) => ({
+                    kind: 'input',
+                    num1: generator.descendInputOfBlock(block, 'num1'),
+                    num2: generator.descendInputOfBlock(block, 'num2')
+                }),
+                binnaryAnd: (generator, block) => ({
+                    kind: 'input',
+                    num1: generator.descendInputOfBlock(block, 'num1'),
+                    num2: generator.descendInputOfBlock(block, 'num2')
+                }),
+                binnaryOr: (generator, block) => ({
+                    kind: 'input',
+                    num1: generator.descendInputOfBlock(block, 'num1'),
+                    num2: generator.descendInputOfBlock(block, 'num2')
+                }),
+                binnaryXor: (generator, block) => ({
+                    kind: 'input',
+                    num1: generator.descendInputOfBlock(block, 'num1'),
+                    num2: generator.descendInputOfBlock(block, 'num2')
+                }),
+                binnaryNot: (generator, block) => ({
+                    kind: 'input',
+                    num1: generator.descendInputOfBlock(block, 'num1')
+                })
+            },
+            js: {
+                shiftLeft: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
+                    const num1 = compiler.descendInput(node.num1).asNumber();
+                    const num2 = compiler.descendInput(node.num2).asNumber();
+                    
+                    return new TypedInput(`${num1} << ${num2}`, TYPE_NUMBER);
+                },
+                shiftRight: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
+                    const num1 = compiler.descendInput(node.num1).asNumber();
+                    const num2 = compiler.descendInput(node.num2).asNumber();
+                    
+                    return new TypedInput(`${num1} >> ${num2}`, TYPE_NUMBER);
+                },
+                binnaryAnd: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
+                    const num1 = compiler.descendInput(node.num1).asNumber();
+                    const num2 = compiler.descendInput(node.num2).asNumber();
+                    
+                    return new TypedInput(`${num1} & ${num2}`, TYPE_NUMBER);
+                },
+                binnaryOr: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
+                    const num1 = compiler.descendInput(node.num1).asNumber();
+                    const num2 = compiler.descendInput(node.num2).asNumber();
+                    
+                    return new TypedInput(`${num1} | ${num2}`, TYPE_NUMBER);
+                },
+                binnaryXor: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
+                    const num1 = compiler.descendInput(node.num1).asNumber();
+                    const num2 = compiler.descendInput(node.num2).asNumber();
+                    
+                    return new TypedInput(`${num1} ^ ${num2}`, TYPE_NUMBER);
+                },
+                binnaryNot: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
+                    const num1 = compiler.descendInput(node.num1).asNumber();
+                    
+                    return new TypedInput(`~${num1}`, TYPE_NUMBER);
                 }
             }
         };
@@ -509,7 +688,7 @@ class pmOperatorsExpansion {
     checkPrime(number) {
         number = Math.trunc(number);
         if (number <= 1) return false;
-        for (var i = 2; i < number; i++) {
+        for (let i = 2; i < number; i++) {
             if (number % i === 0) {
                 return false;
             }
@@ -548,7 +727,7 @@ class pmOperatorsExpansion {
 
         const reduced = this.reduce(first, last);
 
-        return Cast.toNumber(reduced[0]) + ':' + Cast.toNumber(reduced[1]);
+        return `${Cast.toNumber(reduced[0])}:${Cast.toNumber(reduced[1])}`;
     }
 
     truncateNumber(args) {
@@ -610,7 +789,7 @@ class pmOperatorsExpansion {
         let max = Cast.toNumber(args.MAX);
         // check that max isnt less than min
         if (max < min) {
-            let switchover = max;
+            const switchover = max;
             max = min;
             min = switchover;
         }

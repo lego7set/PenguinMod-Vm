@@ -45,7 +45,7 @@ ${blockSeparator}
     </value>
 </block>
 <block type="control_clear_counter"/>
-`
+`;
 
 /**
  * Class of idk
@@ -67,7 +67,7 @@ class pmControlsExpansion {
 
         let idx = 0;
         for (const block of extensionBlocks) {
-            categoryBlocks = categoryBlocks.replace('%block' + idx + '>', block);
+            categoryBlocks = categoryBlocks.replace(`%block${idx}>`, block);
             idx++;
         }
 
@@ -100,7 +100,7 @@ class pmControlsExpansion {
                     blockType: BlockType.CONDITIONAL,
                     arguments: {
                         CONDITION1: { type: ArgumentType.BOOLEAN },
-                        CONDITION2: { type: ArgumentType.BOOLEAN },
+                        CONDITION2: { type: ArgumentType.BOOLEAN }
                     }
                 },
                 {
@@ -114,7 +114,7 @@ class pmControlsExpansion {
                     blockType: BlockType.CONDITIONAL,
                     arguments: {
                         CONDITION1: { type: ArgumentType.BOOLEAN },
-                        CONDITION2: { type: ArgumentType.BOOLEAN },
+                        CONDITION2: { type: ArgumentType.BOOLEAN }
                     }
                 },
                 {
@@ -128,13 +128,13 @@ class pmControlsExpansion {
                     alignments: [
                         null, // text
                         null, // SUBSTACK
-                        ArgumentAlignment.RIGHT, // ICON
+                        ArgumentAlignment.RIGHT // ICON
                     ],
                     arguments: {
                         ICON: {
                             type: ArgumentType.IMAGE,
                             dataURI: AsyncIcon
-                        },
+                        }
                     }
                 },
                 {
@@ -145,7 +145,7 @@ class pmControlsExpansion {
                     arguments: {
                         ICON: {
                             type: ArgumentType.IMAGE,
-                            dataURI: pathToMedia + "/repeat.svg"
+                            dataURI: `${pathToMedia}/repeat.svg`
                         }
                     }
                 }
@@ -203,7 +203,7 @@ class pmControlsExpansion {
                     compiler.source += `return;`;
                 }
             }
-        }
+        };
     }
 
     ifElseIf (args, util) {
