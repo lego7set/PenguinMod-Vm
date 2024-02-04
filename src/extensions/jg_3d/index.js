@@ -42,7 +42,13 @@ class Jg3DBlocks {
         this.runtime = runtime;
 
         this.three = Three;
-
+        // expose addons and that for the funnis
+        this.BufferGeometryUtils = BufferGeometryUtils;
+        this.ConvexGeometry = ConvexGeometry;
+        this.OBJLoader = OBJLoader;
+        this.GLTFLoader = GLTFLoader;
+        this.FBXLoader = FBXLoader;
+        
         // prism has screenshots, lets tell it to use OUR canvas for them
         this.runtime.prism_screenshot_checkForExternalCanvas = true;
         this.runtime.prism_screenshot_externalCanvas = null;
