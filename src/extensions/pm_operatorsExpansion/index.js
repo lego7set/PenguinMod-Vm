@@ -642,36 +642,36 @@ class pmOperatorsExpansion {
                     const num1 = compiler.descendInput(node.num1).asNumber();
                     const num2 = compiler.descendInput(node.num2).asNumber();
                     
-                    return new TypedInput(`${num1} << ${num2}`, TYPE_NUMBER);
+                    return new TypedInput(`(${num1} << ${num2})`, TYPE_NUMBER);
                 },
                 shiftRight: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
                     const num1 = compiler.descendInput(node.num1).asNumber();
                     const num2 = compiler.descendInput(node.num2).asNumber();
                     
-                    return new TypedInput(`${num1} >> ${num2}`, TYPE_NUMBER);
+                    return new TypedInput(`(${num1} >> ${num2})`, TYPE_NUMBER);
                 },
                 binnaryAnd: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
                     const num1 = compiler.descendInput(node.num1).asNumber();
                     const num2 = compiler.descendInput(node.num2).asNumber();
                     
-                    return new TypedInput(`${num1} & ${num2}`, TYPE_NUMBER);
+                    return new TypedInput(`(${num1} & ${num2})`, TYPE_NUMBER);
                 },
                 binnaryOr: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
                     const num1 = compiler.descendInput(node.num1).asNumber();
                     const num2 = compiler.descendInput(node.num2).asNumber();
                     
-                    return new TypedInput(`${num1} | ${num2}`, TYPE_NUMBER);
+                    return new TypedInput(`(${num1} | ${num2})`, TYPE_NUMBER);
                 },
                 binnaryXor: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
                     const num1 = compiler.descendInput(node.num1).asNumber();
                     const num2 = compiler.descendInput(node.num2).asNumber();
                     
-                    return new TypedInput(`${num1} ^ ${num2}`, TYPE_NUMBER);
+                    return new TypedInput(`(${num1} ^ ${num2})`, TYPE_NUMBER);
                 },
                 binnaryNot: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
                     const num1 = compiler.descendInput(node.num1).asNumber();
                     
-                    return new TypedInput(`~${num1}`, TYPE_NUMBER);
+                    return new TypedInput(`(~${num1})`, TYPE_NUMBER);
                 }
             }
         };
