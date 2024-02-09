@@ -227,7 +227,6 @@ class Scratch3PenBlocks {
             this.runtime.renderer.updateDrawableSkinId(this.bitmapDrawableID, this.bitmapSkinID);
             this.runtime.renderer.updateDrawableVisible(this.bitmapDrawableID, false);
         }
-        this._penRes = this.runtime.renderer._allSkins[this._penSkinId].renderQuality;
         return this._penSkinId;
     }
 
@@ -1079,14 +1078,14 @@ class Scratch3PenBlocks {
         let resultFont = '';
         resultFont += `${this.printTextAttribute.italic ? 'italic ' : ''}`;
         resultFont += `${this.printTextAttribute.weight} `;
-        resultFont += `${this.printTextAttribute.size * this._penRes}px `;
+        resultFont += `${this.printTextAttribute.size}px `;
         resultFont += this.printTextAttribute.font;
         ctx.font = resultFont;
 
         ctx.strokeStyle = this.printTextAttribute.color;
         ctx.fillStyle = ctx.strokeStyle;
 
-        ctx.fillText(args.TEXT, args.X * this._penRes, -args.Y * this._penRes);
+        ctx.fillText(args.TEXT, args.X, -args.Y);
 
         this._drawContextToPen(ctx);
     }
@@ -1102,10 +1101,10 @@ class Scratch3PenBlocks {
         ctx.rotate(MathUtil.degToRad(ROTATE - 90));
 
         // use sizes from the image if none specified
-        const width = (WIDTH ?? image.width) * this._penRes;
-        const height = (HEIGHT ?? image.height) * this._penRes;
-        const realX = (X * this._penRes) - (width / 2);
-        const realY = (-Y * this._penRes) - (height / 2);
+        const width = WIDTH ?? image.width;
+        const height = HEIGHT ?? image.height;
+        const realX = X - (width / 2);
+        const realY = -Y - (height / 2);
         const drawArgs = [CROPX, CROPY, CROPW, CROPH, realX, realY, width, height];
 
         // if cropx or cropy are undefined then remove the crop args
@@ -1166,12 +1165,7 @@ class Scratch3PenBlocks {
         const hex = Cast.toString(args.COLOR);
         ctx.fillStyle = hex;
         ctx.strokeStyle = ctx.fillStyle;
-        ctx.fillRect(
-            args.X * this._penRes,
-            -args.Y * this._penRes,
-            args.WIDTH * this._penRes,
-            args.HEIGHT * this._penRes
-        );
+        ctx.fillRect(args.X, -args.Y, args.WIDTH, args.HEIGHT);
 
         this._drawContextToPen(ctx);
     }
@@ -1195,14 +1189,15 @@ class Scratch3PenBlocks {
         const penSkin = this.runtime.renderer._allSkins[penSkinId];
         const width = penSkin._size[0];
         const height = penSkin._size[1];
-        const ctx = this.bitmapCanvas.getContext('2d');
-
         this.bitmapCanvas.width = width;
         this.bitmapCanvas.height = height;
 
+        const ctx = this.bitmapCanvas.getContext('2d');
+
         ctx.clearRect(0, 0, width, height);
-        ctx.save();
         ctx.translate(width / 2, height / 2);
+        console.log(penSkin.renderQuality, this.bitmapCanvas.width, this.bitmapCanvas.height);
+        ctx.scale(penSkin.renderQuality, penSkin.renderQuality);
         return ctx;
     }
 
@@ -1525,7 +1520,7 @@ class Scratch3PenBlocks {
         const penState = this._getPenState(target);
         const penAttributes = penState.penAttributes;
         const penColor = this._getPenColor(util.target);
-        const points = args.SHAPE.map(pos => ({ x: pos.x * this._penRes, y: pos.y * this._penRes }));
+        const points = args.SHAPE;
         const firstPos = points.at(-1);
 
         const ctx = this._getBitmapCanvas();
@@ -1555,8 +1550,10 @@ class Scratch3PenBlocks {
     drawArrayComplexShape (args, util) {
         const providedData = Cast.toString(args.SHAPE);
         const providedPoints = parseArray(providedData); // ignores objects
-        if (providedPoints.length <= 0) return; // we can save processing by just ignoring empty arrays
-        if (providedPoints.length % 2 !== 0) providedPoints.push(0); // the last point is missing a Y value, Y will be 0 for that point
+        // we can save processing by just ignoring empty arrays
+        if (providedPoints.length <= 0) return;
+        // the last point is missing a Y value, Y will be 0 for that point
+        if (providedPoints.length % 2 !== 0) providedPoints.push(0);
         const points = [];
         let currentPoint = {};
         let isXCoord = true;

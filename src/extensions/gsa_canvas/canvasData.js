@@ -16,7 +16,7 @@ class CanvasVar {
         this.runtime = runtime;
         this.renderer = runtime.renderer;
         this.canvas = document.createElement('canvas');
-        this._skinId = this.renderer.createBitmapSkin(this.canvas);
+        this._skinId = this.renderer.createBitmapSkin(this.canvas, 1);
         // img is just a size to be given to the canvas
         if (Array.isArray(img)) {
             this.size = img;
@@ -86,7 +86,13 @@ class CanvasVar {
     }
 
     updateCanvasSkin() {
-        this.renderer.updateBitmapSkin(this._skinId, this.canvas);
+        const width = this.canvas.width;
+        const height = this.canvas.height;
+        const ctx = this.canvas.getContext('2d');
+
+        const printSkin = this.runtime.renderer._allSkins[this._skinId];
+        const imageData = ctx.getImageData(0, 0, width, height);
+        printSkin._setTexture(imageData);
     }
 
     applyCanvasToTarget(target) {
