@@ -652,7 +652,7 @@ class ScriptTreeGenerator {
                 };
             case 'timestamp':
                 return {
-                    kind: 'sensing.timstamp'
+                    kind: 'sensing.timestamp'
                 };
             }
 
