@@ -650,7 +650,12 @@ class ScriptTreeGenerator {
                 return {
                     kind: 'sensing.second'
                 };
+            case 'timestamp':
+                return {
+                    kind: 'sensing.timstamp'
+                };
             }
+
             return {
                 kind: 'constant',
                 value: 0
