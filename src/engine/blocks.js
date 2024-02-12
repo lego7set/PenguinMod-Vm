@@ -687,8 +687,8 @@ class Blocks {
 
             // Update block value
             if (!block.fields[args.name]) return;
-            const field = block.fields[args.name]
-            if (field.id) {
+            const field = block.fields[args.name];
+            if (typeof field.variableType === 'string') {
                 // Get variable name using the id in args.value.
                 const variable = this.runtime.getEditingTarget().lookupVariableById(args.value);
                 if (variable) {
