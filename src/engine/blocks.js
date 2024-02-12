@@ -687,11 +687,14 @@ class Blocks {
 
             // Update block value
             if (!block.fields[args.name]) return;
-            const variable = this.runtime.getEditingTarget().lookupVariableById(args.value);
-            if (variable) {
+            const field = block.fields[args.name]
+            if (field.id) {
                 // Get variable name using the id in args.value.
-                block.fields[args.name].value = variable.name;
-                block.fields[args.name].id = args.value;
+                const variable = this.runtime.getEditingTarget().lookupVariableById(args.value);
+                if (variable) {
+                    block.fields[args.name].value = variable.name;
+                    block.fields[args.name].id = args.value;
+                }
             } else {
                 // Changing the value in a dropdown
                 block.fields[args.name].value = args.value;
