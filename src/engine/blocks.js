@@ -687,14 +687,11 @@ class Blocks {
 
             // Update block value
             if (!block.fields[args.name]) return;
-            if (args.name === 'VARIABLE' || args.name === 'LIST' ||
-                args.name === 'BROADCAST_OPTION') {
+            const variable = this.runtime.getEditingTarget().lookupVariableById(args.value);
+            if (variable) {
                 // Get variable name using the id in args.value.
-                const variable = this.runtime.getEditingTarget().lookupVariableById(args.value);
-                if (variable) {
-                    block.fields[args.name].value = variable.name;
-                    block.fields[args.name].id = args.value;
-                }
+                block.fields[args.name].value = variable.name;
+                block.fields[args.name].id = args.value;
             } else {
                 // Changing the value in a dropdown
                 block.fields[args.name].value = args.value;
