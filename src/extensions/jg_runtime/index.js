@@ -69,7 +69,7 @@ class JgRuntimeBlocks {
                     arguments: {
                         URL: {
                             type: ArgumentType.STRING,
-                            defaultValue: 'https://api.allorigins.win/raw?url=https://github.com/PenguinMod/FreshPkg/raw/main/pkgs/anticors/anticors.sprite3'
+                            defaultValue: `https://corsproxy.io/?${encodeURIComponent('https://penguinmod.com/Sprite1.pms')}`
                         }
                     }
                 },
@@ -80,11 +80,11 @@ class JgRuntimeBlocks {
                     arguments: {
                         URL: {
                             type: ArgumentType.STRING,
-                            defaultValue: 'https://api.allorigins.win/raw?url=https://studio.penguinmod.com/static/assets/9525874be2b1d66bd448bf53400011a9.svg'
+                            defaultValue: `https://corsproxy.io/?${encodeURIComponent('https://penguinmod.com/navicon.png')}`
                         },
                         name: {
                             type: ArgumentType.STRING,
-                            defaultValue: 'blue flag'
+                            defaultValue: 'penguinmod'
                         }
                     }
                 },
