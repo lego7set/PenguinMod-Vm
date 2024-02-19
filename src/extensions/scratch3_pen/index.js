@@ -1097,7 +1097,16 @@ class Scratch3PenBlocks {
             image.onerror = err => reject(err);
             image.src = URI;
         });
+
+        // protect the user from uninteligable errors that may be thrown but probably never will
+        if (!image.complete) throw new Error('the provided image never loaded')
+        if (image.width <= 0) throw new Error(`the image has an invalid width of ${image.width}`)
+        if (image.height <= 0) throw new Error(`the image has an invalid height of ${image.height}`)
+        
         const ctx = this._getBitmapCanvas();
+        // an error that really should never happen, but also shouldnt ever get to the user through here
+        if (ctx.canvas.width <= 0 && ctx.canvas.height <= 0) return
+        
         ctx.rotate(MathUtil.degToRad(ROTATE - 90));
 
         // use sizes from the image if none specified
@@ -1107,8 +1116,8 @@ class Scratch3PenBlocks {
         const realY = -Y - (height / 2);
         const drawArgs = [CROPX, CROPY, CROPW, CROPH, realX, realY, width, height];
 
-        // if cropx or cropy are undefined then remove the crop args
-        if (typeof (CROPX ?? CROPY) === "undefined") {
+        // ensure that all of the drop values exist, just in case :Trollhans
+        if (!(typeof CROPX === "number" && typeof CROPY === "number" && CROPH && CROPH)) {
             drawArgs.splice(0, 4);
         }
 
