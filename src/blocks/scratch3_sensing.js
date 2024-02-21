@@ -571,6 +571,7 @@ class Scratch3SensingBlocks {
             case 'costume #': return attrTarget.currentCostume + 1;
             case 'costume name':
                 return attrTarget.getCostumes()[attrTarget.currentCostume].name;
+            case 'layer': return attrTarget.getLayerOrder();
             case 'size': return attrTarget.size;
             case 'volume': return attrTarget.volume;
             }
