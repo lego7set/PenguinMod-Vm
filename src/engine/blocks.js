@@ -1253,6 +1253,7 @@ class Blocks {
                 xmlString += ` id="${xmlEscape(fieldId)}"`;
             }
             const varType = blockField.variableType;
+            console.log(varType);
             if (typeof varType === 'string') {
                 xmlString += ` variabletype="${xmlEscape(varType)}"`;
             }

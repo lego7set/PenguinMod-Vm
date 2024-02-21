@@ -587,6 +587,8 @@ class Runtime extends EventEmitter {
 
         // list of variable types declared by extensions
         this._extensionVariables = {};
+        // lists all custom serializers
+        this.serializers = {};
     }
 
     /**
@@ -2144,6 +2146,25 @@ class Runtime extends EventEmitter {
     }
 
     /**
+     * registers a custom serializer to allow saving custom data into standard variables
+     * @param {Function} validate validates if a given chunk of data is correctly for this serializer
+     * @param {Function} serialize the function to be ran on serialized data in variables.
+     * @param {Function} deserialize the function to be ran on serialized data in variables
+     */
+    registerSerializer (id, serialize, deserialize) {
+        if (typeof serialize !== 'function') {
+            throw new TypeError('serialize must be of type function');
+        }
+        if (typeof deserialize !== 'function') {
+            throw new TypeError('deserialize must be of type function');
+        }
+        this.serializers[id] = {
+            serialize, 
+            deserialize
+        };
+    }
+
+    /**
      * Register a variable type
      * @param {string} type the type name of this variable
      * @param {ObjectConstructor} varClass the class to handle the data this variable contains
@@ -3535,8 +3556,29 @@ class Runtime extends EventEmitter {
 
     /**
      * Report that the project has loaded in the Virtual Machine.
+     * and also handle the parsing of custom values to allow for 
+     * minimal code when making cross-target refences
      */
     emitProjectLoaded () {
+        for (const target of this.targets) {
+            for (const varId in target.variables) {
+                const variable = target.variables[varId];
+                if (variable.type === Variable.LIST_TYPE) {
+                    for (const idx in variable.value) {
+                        const item = variable.value[idx];
+                        if (item.customType) {
+                            const {deserialize} = this.serializers[item.typeId];
+                            variable.value[idx] = deserialize(item.serialized, target);
+                        }
+                    }
+                }
+                if (variable.value?.customType) {
+                    const customData = variable.value;
+                    const {deserialize} = this.serializers[customData.typeId];
+                    variable.value = deserialize(customData.serialized, target);
+                }
+            }
+        }
         this.emit(Runtime.PROJECT_LOADED);
     }
 

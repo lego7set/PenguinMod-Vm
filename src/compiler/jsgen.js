@@ -1929,6 +1929,7 @@ class JSGenerator {
         script += this.source;
 
         script += '} catch (err) {';
+        script += `console.log("${sanitize(script)}");`;
         script += 'console.error(err);';
         script += `runtime.emit("BLOCK_STACK_ERROR", {`;
         script += `id:"${sanitize(this.script.topBlockId)}",`;

@@ -142,7 +142,7 @@ const waitPromise = function*(promise) {
  * @returns {*} the value returned by the block, if any.
  */
 runtimeFunctions.executeInCompatibilityLayer = `let hasResumedFromPromise = false;
-${runtimeFunctions.waitPromise};
+
 const isPromise = value => (
     // see engine/execute.js
     value !== null &&
@@ -633,6 +633,9 @@ const insertRuntime = source => {
         if (source.includes(functionName)) {
             result += `${runtimeFunctions[functionName]};`;
         }
+    }
+    if (result.includes('executeInCompatibilityLayer') && !result.includes('const waitPromise')) {
+        result = result.replace('let hasResumedFromPromise = false;', `let hasResumedFromPromise = false;\n${runtimeFunctions.waitPromise}`);
     }
     result += `return ${source}`;
     return result;

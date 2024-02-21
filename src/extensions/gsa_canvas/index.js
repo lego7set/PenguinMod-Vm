@@ -161,6 +161,22 @@ class canvas {
             this.sbInfo[item[1]] = info;
         }
         this.runtime.registerVariable('canvas', CanvasVar);
+        this.runtime.registerSerializer(
+            CanvasVar.customId, 
+            canvas => canvas.id, 
+            (varId, target) => {
+                let variable = target.variables[varId];
+                if (!variable) {
+                    for (const target of this.runtime.targets) {
+                        if (target.variables[varId]) {
+                            variable = target.variables[varId];
+                            break;
+                        }
+                    }
+                }
+                return variable;
+            }
+        );
         this.runtime.registerCompiledExtensionBlocks('newCanvas', this.getCompileInfo());
 
         const updateVariables = type => {
@@ -203,7 +219,7 @@ class canvas {
             variables.push(`<label text="Canvases for all sprites"></label>`);
             variables.push(...stageVars);
         }
-        if (privateVars.length) {
+        if (privateVars.length && target.id !== stage.id) {
             variables.push(`<label text="Canvases for this sprite"></label>`);
             variables.push(...privateVars);
         }
@@ -395,8 +411,135 @@ class canvas {
                 },
                 '---',
                 {
+                    opcode: 'drawText',
+                    text: 'draw text [text] at [x] [y] onto [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        },
+                        text: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'photos printed'
+                        },
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        }
+                    },
+                    blockType: BlockType.COMMAND
+                },
+                {
+                    opcode: 'drawTextWithCap',
+                    text: 'draw text [text] at [x] [y] with size cap [cap] onto [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        },
+                        text: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'photos printed'
+                        },
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        cap: {
+                            type: ArgumentType.NUMBER,
+                            defauleValue: '10'
+                        }
+                    },
+                    blockType: BlockType.COMMAND
+                },
+                {
+                    opcode: 'outlineText',
+                    text: 'draw text outline for [text] at [x] [y] onto [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        },
+                        text: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'photos printed'
+                        },
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        }
+                    },
+                    blockType: BlockType.COMMAND
+                },
+                {
+                    opcode: 'outlineTextWithCap',
+                    text: 'draw text outline for [text] at [x] [y] with size cap [cap] onto [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        },
+                        text: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'photos printed'
+                        },
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        cap: {
+                            type: ArgumentType.NUMBER,
+                            defauleValue: '10'
+                        }
+                    },
+                    blockType: BlockType.COMMAND
+                },
+                {
                     opcode: 'drawRect',
                     text: 'draw rectangle at x: [x] y: [y] with width: [width] height: [height] on [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        },
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '0'
+                        },
+                        width: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: this.runtime.stageWidth
+                        },
+                        height: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: this.runtime.stageHeight
+                        }
+                    },
+                    blockType: BlockType.COMMAND
+                },
+                {
+                    opcode: 'outlineRect',
+                    text: 'draw rectangle outline at x: [x] y: [y] with width: [width] height: [height] on [canvas]',
                     arguments: {
                         canvas: {
                             type: ArgumentType.STRING,
@@ -841,9 +984,41 @@ class canvas {
                             menu: 'canvas'
                         }
                     }
+                },
+                {
+                    opcode: 'getDrawnWidthOfText',
+                    blockType: BlockType.REPORTER,
+                    text: 'get [dimension] of text [text] when drawn to [canvas]',
+                    arguments: {
+                        dimension: {
+                            type: ArgumentType.STRING,
+                            menu: 'textDimension'
+                        },
+                        text: {
+                            type: ArgumentType.STRING,
+                            defaultValue: 'bogos binted'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
                 }
             ],
             menus: {
+                textDimension: {
+                    items: [
+                        'width',
+                        'height',
+                        ['bounding box left', 'actualBoundingBoxLeft'],
+                        ['bounding box right', 'actualBoundingBoxRight'],
+                        ['bounding box ascent', 'actualBoundingBoxAscent'],
+                        ['bounding box descent', 'actualBoundingBoxDescent'],
+                        ['font bounding box ascent', 'fontBoundingBoxAscent'],
+                        ['font bounding box descent', 'fontBoundingBoxDescent']
+                        // maby add the other ones but the em ones be hella spotty
+                    ]
+                },
                 canvas: {
                     variableType: 'canvas'
                 },
@@ -864,8 +1039,8 @@ class canvas {
                 if (!name) return;
 
                 const target = scope
-                    ? this.runtime.vm.editingTarget
-                    : this.runtime.getTargetForStage();
+                    ? this.runtime.getTargetForStage()
+                    : this.runtime.vm.editingTarget;
                 target.createVariable(uid(), name, 'canvas');
                 this.runtime.vm.emitWorkspaceUpdate();
             }, ScratchBlocks.Msg.VARIABLE_MODAL_TITLE, 'canvas');
@@ -919,7 +1094,45 @@ class canvas {
                     width: generator.descendInputOfBlock(block, 'width'),
                     height: generator.descendInputOfBlock(block, 'height')
                 }),
+                drawText: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    text: generator.descendInputOfBlock(block, 'text')
+                }),
+                drawTextWithCap: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    text: generator.descendInputOfBlock(block, 'text'),
+                    cap: generator.descendInputOfBlock(block, 'cap')
+                }),
+                outlineText: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    text: generator.descendInputOfBlock(block, 'text')
+                }),
+                outlineTextWithCap: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    text: generator.descendInputOfBlock(block, 'text'),
+                    cap: generator.descendInputOfBlock(block, 'cap')
+                }),
                 drawRect: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas'),
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    width: generator.descendInputOfBlock(block, 'width'),
+                    height: generator.descendInputOfBlock(block, 'height')
+                }),
+                outlineRect: (generator, block) => ({
                     kind: 'stack',
                     canvas: generator.descendVariable(block, 'canvas', 'canvas'),
                     x: generator.descendInputOfBlock(block, 'x'),
@@ -1050,12 +1263,19 @@ class canvas {
                 getDataURI: (generator, block) => ({
                     kind: 'input',
                     canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                getDrawnWidthOfText: (generator, block) => ({
+                    kind: 'input',
+                    prop: block.fields.dimension.value,
+                    text: generator.descendInputOfBlock(block, 'text'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
                 })
             },
             js: {
                 canvasGetter: (node, compiler, {TypedInput, TYPE_UNKNOWN}) => 
                     new TypedInput(compiler.referenceVariable(node.canvas), TYPE_UNKNOWN),
                 setSize: (node, compiler) => {
+                    console.log(node);
                     const canvas = compiler.referenceVariable(node.canvas);
                     const width = compiler.descendInput(node.width).asNumber();
                     const height = compiler.descendInput(node.height).asNumber();
@@ -1148,6 +1368,52 @@ class canvas {
                     compiler.source += `${canvas}._monitorUpToDate = false;\n`;
                     compiler.source += `${canvas}.updateCanvasSkin();\n`;
                 },
+                drawText: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const text = compiler.descendInput(node.text).asString();
+                
+                    compiler.source += `${ctx}.fillText(${text}, ${x}, ${y});\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                },
+                drawTextWithCap: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const text = compiler.descendInput(node.text).asString();
+                    const cap = compiler.descendInput(node.cap).asNumber();
+
+                    compiler.source += `${ctx}.fillText(${text}, ${x}, ${y}, ${cap});\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                },
+                outlineText: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const text = compiler.descendInput(node.text).asString();
+
+                    compiler.source += `${ctx}.strokeText(${text}, ${x}, ${y});\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                },
+                outlineTextWithCap: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const text = compiler.descendInput(node.text).asString();
+                    const cap = compiler.descendInput(node.cap).asNumber();
+
+                    compiler.source += `${ctx}.strokeText(${text}, ${x}, ${y}, ${cap});\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                },
                 drawRect: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
                     const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
@@ -1157,6 +1423,18 @@ class canvas {
                     const height = compiler.descendInput(node.height).asNumber();
 
                     compiler.source += `${ctx}.fillRect(${x}, ${y}, ${width}, ${height});\n`;
+                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
+                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                },
+                outlineRect: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+                    const width = compiler.descendInput(node.width).asNumber();
+                    const height = compiler.descendInput(node.height).asNumber();
+
+                    compiler.source += `${ctx}.strokeRect(${x}, ${y}, ${width}, ${height});\n`;
                     compiler.source += `${canvas}._monitorUpToDate = false;\n`;
                     compiler.source += `${canvas}.updateCanvasSkin();\n`;
                 },
@@ -1353,16 +1631,39 @@ class canvas {
                 getDataURI: (node, compiler, {TypedInput, TYPE_STRING}) => {
                     const canvas = compiler.referenceVariable(node.canvas);
                     return new TypedInput(`${canvas}.toString()`, TYPE_STRING);
+                },
+                getDrawnWidthOfText: (node, compiler, {TypedInput, TYPE_NUMBER}) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const text = compiler.descendInput(node.text).asString();
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const cache = compiler.evaluateOnce(`{}`);
+
+                    let code = `(text => {`;
+                    code += `if (${cache}[text + ${ctx}.font]) return ${cache}[text + ${ctx}.font];\n`;
+                    code += `const textMeasure = ${ctx}.measureText(text);\n`;
+                    code += 'return textMeasure.';
+                    switch (node.prop) {
+                    case 'height': 
+                        code += `actualBoundingBoxAscent + textMeasure.actualBoundingBoxDescent`;
+                        break;
+                    default:
+                        code += node.prop;
+                    }
+                    code += `;})(${text})`;
+
+                    return new TypedInput(code, TYPE_NUMBER);
                 }
             }
         };
     }
 
     getOrCreateVariable(target, id, name) {
-        const variable = target.variables[id];
+        const stage = this.runtime.getTargetForStage();
+        const variable = target.variables[id] ?? stage.variables[id];
         if (!variable) {
-            target.createVariable(id, name);
+            return target.createVariable(id, name);
         }
+        return variable;
     }
     // display monitors
     canvasGetter(args, util) {

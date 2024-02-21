@@ -370,6 +370,37 @@ class pmOperatorsExpansion {
                     }
                 },
                 {
+                    opcode: 'orIfFalsey',
+                    text: '[ONE] or if falsey [TWO]',
+                    blockType: BlockType.BOOLEAN,
+                    disableMonitor: true,
+                    arguments: {
+                        ONE: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "a"
+                        },
+                        TWO: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "b"
+                        }
+                    }
+                },
+                {
+                    opcode: 'ifIsTruthy',
+                    text: 'if [ONE] true then [TWO]',
+                    blockType: BlockType.BOOLEAN,
+                    disableMonitor: true,
+                    arguments: {
+                        ONE: {
+                            type: ArgumentType.BOOLEAN
+                        },
+                        TWO: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "perfect!"
+                        }
+                    }
+                },
+                {
                     opcode: 'shuffleChars',
                     text: 'shuffle [TEXT]',
                     blockType: BlockType.REPORTER,
@@ -635,6 +666,14 @@ class pmOperatorsExpansion {
                 binnaryNot: (generator, block) => ({
                     kind: 'input',
                     num1: generator.descendInputOfBlock(block, 'num1')
+                }),
+                orIfFalsey: (generator, block) => ({
+                    kind: 'input',
+                    num1: generator.descendInputOfBlock(block, 'num1')
+                }),
+                ifIsTruthy: (generator, block) => ({
+                    kind: 'input',
+                    num1: generator.descendInputOfBlock(block, 'num1')
                 })
             },
             js: {
@@ -672,6 +711,18 @@ class pmOperatorsExpansion {
                     const num1 = compiler.descendInput(node.num1).asNumber();
                     
                     return new TypedInput(`(~${num1})`, TYPE_NUMBER);
+                },
+                orIfFalsey: (node, compiler, {TypedInput, TYPE_UNKNOWN}) => {
+                    const num1 = compiler.descendInput(node.ONE).asUnknown();
+                    const num2 = compiler.descendInput(node.TWO).asUnknown();
+                    
+                    return new TypedInput(`(${num1} || ${num2})`, TYPE_UNKNOWN);
+                },
+                ifIsTruthy: (node, compiler, {TypedInput, TYPE_UNKNOWN}) => {
+                    const num1 = compiler.descendInput(node.ONE).asUnknown();
+                    const num2 = compiler.descendInput(node.TWO).asUnknown();
+                    
+                    return new TypedInput(`(${num1} && ${num2})`, TYPE_UNKNOWN);
                 }
             }
         };
