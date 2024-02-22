@@ -1430,13 +1430,13 @@ class JSGenerator {
             break;
         case 'looks.targetFront':
             if (!this.target.isStage) {
-                this.source += `target.goBehindOther(runtime.getSpriteTargetByName("${sanitize(node.layers).asNumber()}"));\n`;
+                this.source += `target.goBehindOther(runtime.getSpriteTargetByName("${sanitize(node.layers).asString()}"));\n`;
                 this.source += `target.goForwardLayers(1);\n`;
             }
             break;
         case 'looks.targetBack':
             if (!this.target.isStage) {
-                this.source += `target.goBehindOther(runtime.getSpriteTargetByName("${sanitize(node.layers).asNumber()}"));\n`;
+                this.source += `target.goBehindOther(runtime.getSpriteTargetByName("${sanitize(node.layers).asString()}"));\n`;
             }
             break;
         case 'looks.hide':
