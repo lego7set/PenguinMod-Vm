@@ -1430,7 +1430,7 @@ class JSGenerator {
             break;
         case 'looks.targetFront':
             if (!this.target.isStage) {
-                this.source += 'target.goBehindOther(runtime.getSpriteTargetByName("${sanitize(node.layers)}));"\n';
+                this.source += 'target.goBehindOther(runtime.getSpriteTargetByName("${sanitize(node.layers)}"));\n';
                 this.source += `target.goForwardLayers(1);\n`;
             }
             break;
