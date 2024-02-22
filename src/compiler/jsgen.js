@@ -1430,7 +1430,7 @@ class JSGenerator {
             break;
         case 'looks.targetFront':
             if (!this.target.isStage) {
-                const reqTarget = runtime.getSpriteTargetByName(sanitize(node.layers.value));
+                const reqTarget = this.target.runtime.getSpriteTargetByName(sanitize(node.layers.value));
                 if (reqTarget) {
                     this.source += `target.goBehindOther(runtime.getSpriteTargetByName("${reqTarget}"));\n`;
                     this.source += `target.goForwardLayers(1);\n`;
@@ -1439,8 +1439,8 @@ class JSGenerator {
             break;
         case 'looks.targetBack':
             if (!this.target.isStage) {
-                const reqTarget = runtime.getSpriteTargetByName(sanitize(node.layers.value));
-                if (reqTarget && reqTarget.getLayerOrder() < target.getLayerOrder()) {
+                const reqTarget = this.target.runtime.getSpriteTargetByName(sanitize(node.layers.value));
+                if (reqTarget && reqTarget.getLayerOrder() < this.target.getLayerOrder()) {
                     this.source += `target.goBehindOther(runtime.getSpriteTargetByName("${reqTarget}"));\n`;
                 }
             }
