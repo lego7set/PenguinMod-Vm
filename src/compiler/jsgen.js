@@ -1428,6 +1428,17 @@ class JSGenerator {
                 this.source += 'target.goToFront();\n';
             }
             break;
+        case 'looks.targetFront':
+            if (!this.target.isStage) {
+                this.source += 'target.goBehindOther(runtime.getSpriteTargetByName("${sanitize(node.layers)}));"\n';
+                this.source += `target.goForwardLayers(1);\n`;
+            }
+            break;
+        case 'looks.targetBack':
+            if (!this.target.isStage) {
+                this.source += 'target.goBehindOther(runtime.getSpriteTargetByName("${sanitize(node.layers)}));"\n';
+            }
+            break;
         case 'looks.hide':
             this.source += 'target.setVisible(false);\n';
             this.source += 'runtime.ext_scratch3_looks._renderBubble(target);\n';
