@@ -876,10 +876,11 @@ class Scratch3LooksBlocks {
 
     goTargetLayer (args, util) {
         let target;
+        const option = args.VISIBLE_OPTION;
         if (option === '_stage_') target = this.runtime.getTargetForStage();
         else target = this.runtime.getSpriteTargetByName(option);
         if (!util.target.isStage && target) {
-            if (args.FORWARD_BACKWARD === 'forward') {
+            if (args.FORWARD_BACKWARD === 'infront') {
                 util.target.goBehindOther(target);
                 util.target.goForwardLayers(1);
             } else {
