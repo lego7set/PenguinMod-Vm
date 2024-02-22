@@ -1432,7 +1432,7 @@ class JSGenerator {
             if (!this.target.isStage) {
                 const reqTarget = this.target.runtime.getSpriteTargetByName(node.layers.value);
                 if (reqTarget) {
-                    this.source += `target.goBehindOther(${reqTarget});\n`;
+                    this.source += `target.goBehindOther(${JSON.stringify(reqTarget)});\n`;
                     this.source += `target.goForwardLayers(1);\n`;
                 }
             }
@@ -1441,7 +1441,7 @@ class JSGenerator {
             if (!this.target.isStage) {
                 const reqTarget = this.target.runtime.getSpriteTargetByName(node.layers.value);
                 if (reqTarget && reqTarget.getLayerOrder() < this.target.getLayerOrder()) {
-                    this.source += `target.goBehindOther(${reqTarget});\n`;
+                    this.source += `target.goBehindOther(${JSON.stringify(reqTarget)});\n`;
                 }
             }
             break;
