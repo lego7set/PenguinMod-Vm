@@ -1268,6 +1268,17 @@ class ScriptTreeGenerator {
                 kind: 'looks.backwardLayers',
                 layers: this.descendInputOfBlock(block, 'NUM')
             };
+        case 'looks_goTargetLayer':
+            if (block.fields.FORWARD_BACKWARD.value === 'infront') {
+                return {
+                    kind: 'looks.targetFront',
+                    layers: this.descendInputOfBlock(block, 'VISIBLE_OPTION')
+                };
+            }
+            return {
+                kind: 'looks.targetBack',
+                layers: this.descendInputOfBlock(block, 'VISIBLE_OPTION')
+            };
         case 'looks_gotofrontback':
             if (block.fields.FRONT_BACK.value === 'front') {
                 return {
