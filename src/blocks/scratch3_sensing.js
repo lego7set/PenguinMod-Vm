@@ -536,18 +536,19 @@ class Scratch3SensingBlocks {
 
         this._cachedLoudnessTimestamp = this._timer.time();
         this._cachedLoudness = this.runtime.audioEngine.getLoudness();
-        this.pushLoudness();
+        this.pushLoudness(this._cachedLoudness);
         return this._cachedLoudness;
     }
 
     isLoud () {
       this.pushLoudness();
       let sum = this._loudnessList.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
-      return this.getLoudness() > (Math.round((sum / this._loudnessList.length) * 100) / 100) * 1.5;
+      sum = sum / this._loudnessList.length;
+      return this.getLoudness() > sum * (1 + (1 - (this._loudnessList.length / 60)));
     }
-    pushLoudness () {
+    pushLoudness (value) {
       if (this._loudnessList.length >= 30) this._loudnessList.shift(); // remove first item
-      this._loudnessList.push(this.getLoudness());
+      this._loudnessList.push(value ?? this.getLoudness());
     }
     
     getAttributeOf (args) {
