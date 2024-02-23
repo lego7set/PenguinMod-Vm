@@ -37,6 +37,12 @@ class Scratch3SensingBlocks {
         this._cachedLoudnessTimestamp = 0;
 
         /**
+         * The list of loudness values to determine the average.
+         * @type {!Array}
+         */
+        this._loudnessList = [];
+
+        /**
          * The list of queued questions and respective `resolve` callbacks.
          * @type {!Array}
          */
@@ -530,13 +536,20 @@ class Scratch3SensingBlocks {
 
         this._cachedLoudnessTimestamp = this._timer.time();
         this._cachedLoudness = this.runtime.audioEngine.getLoudness();
+        this.pushLoudness();
         return this._cachedLoudness;
     }
 
     isLoud () {
-        return this.getLoudness() > 10;
+      this.pushLoudness();
+      let sum = this._loudnessList.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+      return this.getLoudness() > (Math.round((sum / this._loudnessList.length) * 100) / 100) - 1;
     }
-
+    pushLoudness () {
+      if (this._loudnessList.length >= 30) this._loudnessList.shift(); // remove first item
+      this._loudnessList.push(this.getLoudness());
+    }
+    
     getAttributeOf (args) {
         let attrTarget;
 
