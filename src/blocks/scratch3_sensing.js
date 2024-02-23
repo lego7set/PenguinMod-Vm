@@ -544,7 +544,7 @@ class Scratch3SensingBlocks {
       this.pushLoudness();
       let sum = this._loudnessList.reduce((accumulator, currentValue) => accumulator + currentValue, 0);
       sum = sum / this._loudnessList.length;
-      return this.getLoudness() > sum * (1 + (1 - (this._loudnessList.length / 60)));
+      return this.getLoudness() > sum + 15;
     }
     pushLoudness (value) {
       if (this._loudnessList.length >= 30) this._loudnessList.shift(); // remove first item
