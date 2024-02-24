@@ -922,6 +922,8 @@ class JSGenerator {
             return new TypedInput(`target.isTouchingColor(colorToList(${this.descendInput(node.color).asColor()}))`, TYPE_BOOLEAN);
         case 'sensing.username':
             return new TypedInput('runtime.ioDevices.userData.getUsername()', TYPE_STRING);
+        case 'sensing.loggedin':
+            return new TypedInput('runtime.ioDevices.userData.getLoggedIn()', TYPE_STRING);
         case 'sensing.year':
             return new TypedInput(`(new Date().getFullYear())`, TYPE_NUMBER);
 

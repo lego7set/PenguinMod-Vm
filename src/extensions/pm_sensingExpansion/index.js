@@ -584,7 +584,8 @@ class pmSensingExpansion {
     setUsername(args) {
         const username = Cast.toString(args.NAME);
         vm.postIOData('userData', {
-            username: username
+            username: username,
+            loggedIn: false,
         });
     }
 

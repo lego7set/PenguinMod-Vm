@@ -711,7 +711,10 @@ class ScriptTreeGenerator {
             return {
                 kind: 'sensing.username'
             };
-            
+        case 'sensing_loggedin': 
+            return {
+                kind: 'sensing.loggedin'
+            };
         case 'operator_trueBoolean':
             return {
                 kind: 'op.true'

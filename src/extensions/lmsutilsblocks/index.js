@@ -1340,7 +1340,10 @@ class LMSUtils {
     }
 
     setUsername(args, util) {
-        util.runtime.ioDevices.userData._username = args.INPUT;
+        util.runtime.vm.postIOData('userData', {
+            username: args.INPUT,
+            loggedIn: false,
+        });
     }
 
     consoleLog(args) {
