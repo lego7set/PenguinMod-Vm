@@ -1315,7 +1315,36 @@ class VirtualMachine extends EventEmitter {
      * @property {number} [bitmapResolution] - the resolution scale for a bitmap backdrop.
      * @returns {?Promise} - a promise that resolves when the backdrop has been added
      */
-    addBackdrop (md5ext, backdropObject) {
+    addBackdrop(md5ext, backdropObject) {
+        if (backdropObject.fromPenguinModLibrary === true) {
+            return new Promise((resolve, reject) => {
+                fetch(`${PM_LIBRARY_API}files/${backdropObject.libraryId}`)
+                    .then((r) => r.arrayBuffer())
+                    .then((arrayBuffer) => {
+                        const dataFormat = backdropObject.dataFormat;
+                        const storage = this.runtime.storage;
+                        const asset = new storage.Asset(
+                            storage.AssetType[dataFormat === 'svg' ? "ImageVector" : "ImageBitmap"],
+                            null,
+                            storage.DataFormat[dataFormat.toUpperCase()],
+                            new Uint8Array(arrayBuffer),
+                            true
+                        );
+                        const newCostumeObject = {
+                            md5: asset.assetId + '.' + asset.dataFormat,
+                            asset: asset,
+                            name: backdropObject.name
+                        }
+                        loadCostume(newCostumeObject.md5, newCostumeObject, this.runtime).then(costumeAsset => {
+                            const stage = this.runtime.getTargetForStage();
+                            stage.addCostume(newCostumeObject);
+                            stage.setCostume(stage.getCostumes().length - 1);
+                            this.runtime.emitProjectChanged();
+                            resolve(costumeAsset, newCostumeObject);
+                        })
+                    }).catch(reject);
+            });
+        }
         return loadCostume(md5ext, backdropObject, this.runtime).then(() => {
             const stage = this.runtime.getTargetForStage();
             stage.addCostume(backdropObject);
