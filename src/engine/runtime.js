@@ -2915,20 +2915,7 @@ class Runtime extends EventEmitter {
             this._refreshTargets = false;
         }
 
-        let hasNeedingCustoms = false;
-        for (const [_, monitor] of this._monitorState) {
-            const value = monitor.get('value');
-            if (Array.isArray(value)) {
-                for (const item of value) {
-                    if (!item._monitorUpToDate) {
-                        value._monitorUpToDate = false;
-                        hasNeedingCustoms = true;
-                    }
-                }
-            }
-            if (!value._monitorUpToDate) hasNeedingCustoms = true;
-        }
-        if (!this._prevMonitorState.equals(this._monitorState) || hasNeedingCustoms) {
+        if (!this._prevMonitorState.equals(this._monitorState)) {
             this.emit(Runtime.MONITORS_UPDATE, this._monitorState);
             this._prevMonitorState = this._monitorState;
         }
