@@ -65,15 +65,18 @@ class Scratch3ControlBlocks {
         this.runtime.greenFlag();
         const container = util.thread.blockContainer;
         let myId = util.thread.isCompiled ? util.thread.peekStack() : util.thread.peekStackFrame().op.id;
+        console.log(myId);
         myId = container.getBlock(myId);
-        const checkThreads = () => {
-            if (this.runtime.threads.length === 0) {
-                if (myId.next) this.runtime._pushThread(myId.next, util.target);
-            } else {
-                setTimeout(checkThreads, 10);
-            }
-        };
-        checkThreads();
+        if (myId) {
+          const checkThreads = () => {
+              if (this.runtime.threads.length === 0) {
+                  if (myId.next) this.runtime._pushThread(myId.next, util.target);
+              } else {
+                  setTimeout(checkThreads, 10);
+              }
+          };
+          checkThreads();
+        }
     }
 
     if_return_else_return (args) {
