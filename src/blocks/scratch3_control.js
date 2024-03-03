@@ -61,22 +61,12 @@ class Scratch3ControlBlocks {
         };
     }
 
-    backToGreenFlag (_, util) {
-        this.runtime.greenFlag();
-        const container = util.thread.blockContainer;
-        let myId = util.thread.isCompiled ? util.thread.peekStack() : util.thread.peekStackFrame().op.id;
-        console.log(myId);
-        myId = container.getBlock(myId);
-        if (myId) {
-          const checkThreads = () => {
-              if (this.runtime.threads.length === 0) {
-                  if (myId.next) this.runtime._pushThread(myId.next, util.target);
-              } else {
-                  setTimeout(checkThreads, 10);
-              }
-          };
-          checkThreads();
-        }
+    backToGreenFlag(_, util) {
+        const thisThread = util.thread.topBlock;
+        this.runtime.threads
+            .filter(thread => thread.topBlock !== thisThread)
+            .forEach(thread => thread.stopThisScript());
+        this.runtime.startHats("event_whenflagclicked");
     }
 
     if_return_else_return (args) {
