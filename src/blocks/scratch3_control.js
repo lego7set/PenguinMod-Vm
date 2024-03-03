@@ -66,6 +66,13 @@ class Scratch3ControlBlocks {
         this.runtime.threads
             .filter(thread => thread.topBlock !== thisThread)
             .forEach(thread => thread.stopThisScript());
+        // green flag behaviour
+        this.runtime.updateCurrentMSecs();
+        this.runtime.ioDevices.clock.resetProjectTimer();
+        this.runtime.targets.forEach(target => target.clearEdgeActivatedValues());
+        for (let i = 0; i < this.runtime.targets.length; i++) {
+            this.runtime.targets[i].onGreenFlag();
+        }
         this.runtime.startHats("event_whenflagclicked");
     }
 
