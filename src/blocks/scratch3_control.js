@@ -75,7 +75,10 @@ class Scratch3ControlBlocks {
         for (let i = 0; i < this.runtime.targets.length; i++) {
             const thisTarget = this.runtime.targets[i];
             thisTarget.onGreenFlag();
-            if (!thisTarget.isOriginal) thisTarget.dispose(); 
+            if (!thisTarget.isOriginal) {
+                this.runtime.disposeTarget(thisTarget);
+                this.runtime.stopForTarget(thisTarget);
+            }
         }
         this.runtime.startHats("event_whenflagclicked");
     }
