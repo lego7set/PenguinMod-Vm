@@ -414,6 +414,9 @@ class ExtensionManager {
             throw new Error(`Invalid extension URL: ${extensionURL}`);
         }
 
+        if (extensionURL.includes("penguinmod.site")) {
+            alert("Extensions using penguinmod.site are deprecated, please swap them over to use penguinmod.com instead.")
+        }
         const normalURL = extensionURL.replace("penguinmod.site", "penguinmod.com");
 
         this.runtime.setExternalCommunicationMethod('customExtensions', true);
