@@ -1,3 +1,4 @@
+/* eslint-disable no-multi-spaces */
 /* eslint-disable no-invalid-this */
 /* eslint-disable no-undef */
 const BlockType = require('../../extension-support/block-type');
@@ -939,6 +940,307 @@ class canvas {
                 },
                 {
                     blockType: BlockType.LABEL,
+                    text: "transforms"
+                },
+                {
+                    opcode: 'saveTransform',
+                    blockType: BlockType.COMMAND,
+                    text: 'save [canvas]\'s transform',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'restoreTransform',
+                    blockType: BlockType.COMMAND,
+                    text: 'reset to [canvas]\'s saved transform',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                "---",
+                {
+                    opcode: 'turnRotationLeft',
+                    blockType: BlockType.COMMAND,
+                    text: 'turn left [degrees] in [canvas]',
+                    arguments: {
+                        degrees: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '90'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'turnRotationRight',
+                    blockType: BlockType.COMMAND,
+                    text: 'turn right [degrees] in [canvas]',
+                    arguments: {
+                        degrees: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '90'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'setRotation',
+                    blockType: BlockType.COMMAND,
+                    text: 'set rotation to [degrees] in [canvas]',
+                    arguments: {
+                        degrees: {
+                            type: ArgumentType.ANGLE,
+                            defaultValue: '90'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                "---",
+                {
+                    opcode: 'setTranslateXY',
+                    blockType: BlockType.COMMAND,
+                    text: 'set translation X: [x] Y: [y] on [canvas]',
+                    arguments: {
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'changeTranslateXY',
+                    blockType: BlockType.COMMAND,
+                    text: 'change translation X: [x] Y: [y] on [canvas]',
+                    arguments: {
+                        x: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10'
+                        },
+                        y: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                "---",
+                {
+                    opcode: 'changeTranslateX',
+                    blockType: BlockType.COMMAND,
+                    text: 'change X translation by [amount] on [canvas]',
+                    arguments: {
+                        amount: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'setTranslateX',
+                    blockType: BlockType.COMMAND,
+                    text: 'set X scaler to [amount] on [canvas]',
+                    arguments: {
+                        amount: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '50'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'changeTranslateY',
+                    blockType: BlockType.COMMAND,
+                    text: 'change Y translation by [amount] on [canvas]',
+                    arguments: {
+                        amount: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'setTranslateY',
+                    blockType: BlockType.COMMAND,
+                    text: 'set Y translation by [amount] on [canvas]',
+                    arguments: {
+                        amount: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '50'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                "---",
+                {
+                    opcode: 'changeScaleXY',
+                    blockType: BlockType.COMMAND,
+                    text: 'change XY scaler by [percent]% on [canvas]',
+                    arguments: {
+                        percent: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'setScaleXY',
+                    blockType: BlockType.COMMAND,
+                    text: 'set XY scaler to [percent]% on [canvas]',
+                    arguments: {
+                        percent: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '50'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'changeScaleX',
+                    blockType: BlockType.COMMAND,
+                    text: 'change X scaler by [percent]% on [canvas]',
+                    arguments: {
+                        percent: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '10'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'setScaleX',
+                    blockType: BlockType.COMMAND,
+                    text: 'set X scaler to [percent]% on [canvas]',
+                    arguments: {
+                        percent: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '50'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'changeScaleY',
+                    blockType: BlockType.COMMAND,
+                    text: 'change Y scaler by [percent]% on [canvas]',
+                    arguments: {
+                        percent: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '50'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'setScaleY',
+                    blockType: BlockType.COMMAND,
+                    text: 'set Y scaler to [percent]% on [canvas]',
+                    arguments: {
+                        percent: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: '50'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                "---",
+                {
+                    opcode: 'resetTransform',
+                    blockType: BlockType.COMMAND,
+                    text: 'clear transform in [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'loadTransform',
+                    blockType: BlockType.COMMAND,
+                    text: 'set new transform [transform] on [canvas]',
+                    arguments: {
+                        transform: {
+                            type: ArgumentType.STRING,
+                            defaultValue: '[1, 0, 0, 1, 0, 0]'
+                        },
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    opcode: 'getTransform',
+                    blockType: BlockType.REPORTER,
+                    text: 'get current transform in [canvas]',
+                    arguments: {
+                        canvas: {
+                            type: ArgumentType.STRING,
+                            menu: 'canvas'
+                        }
+                    }
+                },
+                {
+                    blockType: BlockType.LABEL,
                     text: "utilizing"
                 },
                 {
@@ -1256,6 +1558,104 @@ class canvas {
                     kind: 'stack',
                     canvas: generator.descendVariable(block, 'canvas', 'canvas')
                 }),
+                saveTransform: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                restoreTransform: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                turnRotationLeft: (generator, block) => ({
+                    kind: 'stack',
+                    degrees: generator.descendInputOfBlock(block, 'degrees'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                turnRotationRight: (generator, block) => ({
+                    kind: 'stack',
+                    degrees: generator.descendInputOfBlock(block, 'degrees'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                setRotation: (generator, block) => ({
+                    kind: 'stack',
+                    degrees: generator.descendInputOfBlock(block, 'degrees'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                setTranslateXY: (generator, block) => ({
+                    kind: 'stack',
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                changeTranslateXY: (generator, block) => ({
+                    kind: 'stack',
+                    x: generator.descendInputOfBlock(block, 'x'),
+                    y: generator.descendInputOfBlock(block, 'y'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                changeTranslateX: (generator, block) => ({
+                    kind: 'stack',
+                    x: generator.descendInputOfBlock(block, 'amount'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                setTranslateX: (generator, block) => ({
+                    kind: 'stack',
+                    x: generator.descendInputOfBlock(block, 'amount'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                changeTranslateY: (generator, block) => ({
+                    kind: 'stack',
+                    y: generator.descendInputOfBlock(block, 'amount'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                setTranslateY: (generator, block) => ({
+                    kind: 'stack',
+                    y: generator.descendInputOfBlock(block, 'amount'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                changeScaleXY: (generator, block) => ({
+                    kind: 'stack',
+                    scale: generator.descendInputOfBlock(block, 'percent'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                setScaleXY: (generator, block) => ({
+                    kind: 'stack',
+                    scale: generator.descendInputOfBlock(block, 'percent'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                changeScaleX: (generator, block) => ({
+                    kind: 'stack',
+                    scale: generator.descendInputOfBlock(block, 'percent'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                setScaleX: (generator, block) => ({
+                    kind: 'stack',
+                    scale: generator.descendInputOfBlock(block, 'percent'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                changeScaleY: (generator, block) => ({
+                    kind: 'stack',
+                    scale: generator.descendInputOfBlock(block, 'percent'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                setScaleY: (generator, block) => ({
+                    kind: 'stack',
+                    scale: generator.descendInputOfBlock(block, 'percent'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                resetTransform: (generator, block) => ({
+                    kind: 'stack',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                loadTransform: (generator, block) => ({
+                    kind: 'stack',
+                    transform: generator.descendInputOfBlock(block, 'transform'),
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
+                getTransform: (generator, block) => ({
+                    kind: 'input',
+                    canvas: generator.descendVariable(block, 'canvas', 'canvas')
+                }),
                 putOntoSprite: (generator, block) => ({
                     kind: 'stack',
                     canvas: generator.descendVariable(block, 'canvas', 'canvas')
@@ -1282,6 +1682,7 @@ class canvas {
 
                     compiler.source += `${canvas}.canvas.width = ${width};\n`;
                     compiler.source += `${canvas}.canvas.height = ${height};\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 setProperty: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1353,8 +1754,7 @@ class canvas {
                     const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
 
                     compiler.source += `${ctx}.clearRect(0, 0, ${canvas}.canvas.width, ${canvas}.canvas.height);\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 clearAria: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1365,8 +1765,7 @@ class canvas {
                     const height = compiler.descendInput(node.height).asNumber();
 
                     compiler.source += `${ctx}.clearRect(${x}, ${y}, ${width}, ${height});\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 drawText: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1376,8 +1775,7 @@ class canvas {
                     const text = compiler.descendInput(node.text).asString();
                 
                     compiler.source += `${ctx}.fillText(${text}, ${x}, ${y});\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 drawTextWithCap: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1388,8 +1786,7 @@ class canvas {
                     const cap = compiler.descendInput(node.cap).asNumber();
 
                     compiler.source += `${ctx}.fillText(${text}, ${x}, ${y}, ${cap});\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 outlineText: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1399,8 +1796,7 @@ class canvas {
                     const text = compiler.descendInput(node.text).asString();
 
                     compiler.source += `${ctx}.strokeText(${text}, ${x}, ${y});\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 outlineTextWithCap: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1411,8 +1807,7 @@ class canvas {
                     const cap = compiler.descendInput(node.cap).asNumber();
 
                     compiler.source += `${ctx}.strokeText(${text}, ${x}, ${y}, ${cap});\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 drawRect: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1423,8 +1818,7 @@ class canvas {
                     const height = compiler.descendInput(node.height).asNumber();
 
                     compiler.source += `${ctx}.fillRect(${x}, ${y}, ${width}, ${height});\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 outlineRect: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1435,8 +1829,7 @@ class canvas {
                     const height = compiler.descendInput(node.height).asNumber();
 
                     compiler.source += `${ctx}.strokeRect(${x}, ${y}, ${width}, ${height});\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 preloadUriImage: (node, compiler) => {
                     const allPreloaded = compiler.evaluateOnce('{}');
@@ -1479,8 +1872,7 @@ class canvas {
                     compiler.source += `? ${allPreloaded}[${uri}]`;
                     compiler.source += `: yield* waitPromise(resolveImageURL(${uri}))`;
                     compiler.source += `, ${x}, ${y});\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 drawUriImageWHR: (node, compiler) => {
                     const allPreloaded = compiler.evaluateOnce('{}');
@@ -1498,8 +1890,7 @@ class canvas {
                     compiler.source += `${allPreloaded}[${uri}] : `;
                     compiler.source += `yield* waitPromise(resolveImageURL(${uri}))`;
                     compiler.source += `, ${x}, ${y}, ${width}, ${height}, ${dir});\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 drawUriImageWHCX1Y1X2Y2R: (node, compiler) => {
                     const allPreloaded = compiler.evaluateOnce('{}');
@@ -1522,8 +1913,7 @@ class canvas {
                     compiler.source += `yield* waitPromise(resolveImageURL(${uri}))`;
                     compiler.source += `, ${x}, ${y}, ${width}, ${height}, ${dir}, `;
                     compiler.source += `${cropX}, ${cropY}, ${cropWidth}, ${cropHeight});\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 getWidthOfCanvas: (node, compiler, {TYPE_NUMBER, TypedInput}) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1585,7 +1975,7 @@ class canvas {
                     const dir = compiler.descendInput(node.dir).asNumber();
 
                     compiler.source += `${ctx}.ellipse(${x}, ${y}, ${width}, ${height}`;
-                    compiler.source += `, ${dir} * Math.PI / 180, 0, 2 * Math.PI);\n`;
+                    compiler.source += `, (${dir} - 90) * Math.PI / 180, 0, 2 * Math.PI);\n`;
                 },
                 addEllipseStartStop: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1599,7 +1989,7 @@ class canvas {
                     const end = compiler.descendInput(node.end).asNumber();
 
                     compiler.source += `${ctx}.ellipse(${x}, ${y}, ${width}, ${height}, `;
-                    compiler.source += `${dir} * Math.PI / 180, ${start} * Math.PI / 180, ${end} * Math.PI / 180);\n`;
+                    compiler.source += `(${dir} - 90) * Math.PI / 180, (${start} - 90) * Math.PI / 180, (${end} - 90) * Math.PI / 180);\n`;
                 },
                 closePath: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1612,16 +2002,203 @@ class canvas {
                     const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
 
                     compiler.source += `${ctx}.stroke();\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
                 },
                 fill: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
                     const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
 
                     compiler.source += `${ctx}.fill();\n`;
-                    compiler.source += `${canvas}._monitorUpToDate = false;\n`;
-                    compiler.source += `${canvas}.updateCanvasSkin();\n`;
+                    compiler.source += `${canvas}.updateCanvasContentRenders();\n`;
+                },
+                saveTransform: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+
+                    compiler.source += `${ctx}.save();\n`;
+                },
+                restoreTransform: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+
+                    compiler.source += `${ctx}.restore();\n`;
+                },
+                turnRotationLeft: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const degrees = compiler.descendInput(node.degrees).asNumber();
+
+                    compiler.source += `${ctx}.rotate(`;
+                    compiler.source += `(${canvas}._cameraStuff.rotation -= ${degrees}) * Math.PI / 180`;
+                    compiler.source += `);\n`;
+                },
+                turnRotationRight: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const degrees = compiler.descendInput(node.degrees).asNumber();
+
+                    compiler.source += `${ctx}.rotate(`;
+                    compiler.source += `(${canvas}._cameraStuff.rotation += ${degrees}) * Math.PI / 180`;
+                    compiler.source += `);\n`;
+                },
+                setRotation: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const degrees = compiler.descendInput(node.degrees).asNumber();
+
+                    compiler.source += `${ctx}.rotate(`;
+                    compiler.source += `((${canvas}._cameraStuff.rotation = ${degrees}) - 90) * Math.PI / 180`;
+                    compiler.source += `);\n`;
+                },
+                setTranslateXY: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+
+                    compiler.source += `${ctx}.translate(`;
+                    compiler.source += `${canvas}._cameraStuff.x = ${x},`;
+                    compiler.source += `${canvas}._cameraStuff.y = ${y}`;
+                    compiler.source += `);\n`;
+                },
+                changeTranslateXY: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+                    const y = compiler.descendInput(node.y).asNumber();
+
+                    compiler.source += `${ctx}.translate(`;
+                    compiler.source += `${canvas}._cameraStuff.x += ${x},`;
+                    compiler.source += `${canvas}._cameraStuff.y += ${y}`;
+                    compiler.source += `);\n`;
+                },
+                changeTranslateX: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+
+                    compiler.source += `${ctx}.translate(`;
+                    compiler.source += `${canvas}._cameraStuff.x += ${x},`;
+                    compiler.source += `${canvas}._cameraStuff.y`;
+                    compiler.source += `);\n`;
+                },
+                setTranslateX: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const x = compiler.descendInput(node.x).asNumber();
+
+                    compiler.source += `${ctx}.translate(`;
+                    compiler.source += `${canvas}._cameraStuff.x = ${x},`;
+                    compiler.source += `${canvas}._cameraStuff.y`;
+                    compiler.source += `);\n`;
+                },
+                changeTranslateY: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const y = compiler.descendInput(node.y).asNumber();
+
+                    compiler.source += `${ctx}.translate(`;
+                    compiler.source += `${canvas}._cameraStuff.x,`;
+                    compiler.source += `${canvas}._cameraStuff.y += ${y}`;
+                    compiler.source += `);\n`;
+                },
+                setTranslateY: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const y = compiler.descendInput(node.y).asNumber();
+
+                    compiler.source += `${ctx}.translate(`;
+                    compiler.source += `${canvas}._cameraStuff.x,`;
+                    compiler.source += `${canvas}._cameraStuff.y = ${y}`;
+                    compiler.source += `);\n`;
+                },
+                changeScaleXY: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const scale = compiler.descendInput(node.scale).asNumber();
+
+                    compiler.source += `${ctx}.scale(`;
+                    compiler.source += `${canvas}._cameraStuff.scaleX += (${scale} / 100),`;
+                    compiler.source += `${canvas}._cameraStuff.scaleY += (${scale} / 100)`;
+                    compiler.source += `);\n`;
+                },
+                setScaleXY: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const scale = compiler.descendInput(node.scale).asNumber();
+
+                    compiler.source += `${ctx}.scale(`;
+                    compiler.source += `${canvas}._cameraStuff.scaleX = (${scale} / 100),`;
+                    compiler.source += `${canvas}._cameraStuff.scaleY = (${scale} / 100)`;
+                    compiler.source += `);\n`;
+                },
+                changeScaleX: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const scale = compiler.descendInput(node.scale).asNumber();
+
+                    compiler.source += `${ctx}.scale(`;
+                    compiler.source += `${canvas}._cameraStuff.scaleX += (${scale} / 100),`;
+                    compiler.source += `${canvas}._cameraStuff.scaleY`;
+                    compiler.source += `);\n`;
+                },
+                setScaleX: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const scale = compiler.descendInput(node.scale).asNumber();
+
+                    compiler.source += `${ctx}.scale(`;
+                    compiler.source += `${canvas}._cameraStuff.scaleX = (${scale} / 100),`;
+                    compiler.source += `${canvas}._cameraStuff.scaleY`;
+                    compiler.source += `);\n`;
+                },
+                changeScaleY: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const scale = compiler.descendInput(node.scale).asNumber();
+
+                    compiler.source += `${ctx}.scale(`;
+                    compiler.source += `${canvas}._cameraStuff.scaleX,`;
+                    compiler.source += `${canvas}._cameraStuff.scaleY += (${scale} / 100)`;
+                    compiler.source += `);\n`;
+                },
+                setScaleY: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const scale = compiler.descendInput(node.scale).asNumber();
+
+                    compiler.source += `${ctx}.scale(`;
+                    compiler.source += `${canvas}._cameraStuff.scaleX,`;
+                    compiler.source += `${canvas}._cameraStuff.scaleY = (${scale} / 100)`;
+                    compiler.source += `);\n`;
+                },
+                resetTransform: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+
+                    compiler.source += `${ctx}.resetTransform();\n`;
+                },
+                loadTransform: (node, compiler) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+                    const transform = compiler.descendInput(node.transform).asString();
+
+                    compiler.source += `${ctx}.setTransform(`;
+                    compiler.source += `parseJSONSafe(${transform})`;
+                    compiler.source += `);\n`;
+                },
+                getTransform: (node, compiler, { TypedInput, TYPE_STRING }) => {
+                    const canvas = compiler.referenceVariable(node.canvas);
+                    const ctx = compiler.evaluateOnce(`${canvas}.canvas.getContext('2d')`);
+
+                    let content = '(() => {';
+                    content += `const transform = ${ctx}.getTransform(); `;
+                    content += 'return JSON.stringify([';
+                    content += 'transform.a, transform.b, transform.c, ';
+                    content += 'transform.d, transform.e, transform.f';
+                    content += '])})()';
+
+                    return new TypedInput(content, TYPE_STRING);
                 },
                 putOntoSprite: (node, compiler) => {
                     const canvas = compiler.referenceVariable(node.canvas);
@@ -1639,8 +2216,11 @@ class canvas {
                     const cache = compiler.evaluateOnce(`{}`);
 
                     let code = `(text => {`;
-                    code += `if (${cache}[text + ${ctx}.font]) return ${cache}[text + ${ctx}.font];\n`;
-                    code += `const textMeasure = ${ctx}.measureText(text);\n`;
+                    code += `let textMeasure = ${cache}[text + ${ctx}.font]`;
+                    code += `if (!textMeasure) {`;
+                    code +=     `textMeasure = ${ctx}.measureText(text);\n`;
+                    code +=     `${cache}[text + ${ctx}.font] = textMeasure;\n`;
+                    code += '}\n';
                     code += 'return textMeasure.';
                     switch (node.prop) {
                     case 'height': 

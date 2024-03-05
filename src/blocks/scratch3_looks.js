@@ -369,6 +369,7 @@ class Scratch3LooksBlocks {
             looks_setstretchto: this.stretchSet,
             looks_gotofrontback: this.goToFrontBack,
             looks_goforwardbackwardlayers: this.goForwardBackwardLayers,
+            looks_goTargetLayer: this.goTargetLayer,
             looks_layersSetLayer: this.setSpriteLayer,
             looks_layersGetLayer: this.getSpriteLayer,
             looks_size: this.getSize,
@@ -869,6 +870,21 @@ class Scratch3LooksBlocks {
                 util.target.goForwardLayers(Cast.toNumber(args.NUM));
             } else {
                 util.target.goBackwardLayers(Cast.toNumber(args.NUM));
+            }
+        }
+    }
+
+    goTargetLayer (args, util) {
+        let target;
+        const option = args.VISIBLE_OPTION;
+        if (option === '_stage_') target = this.runtime.getTargetForStage();
+        else target = this.runtime.getSpriteTargetByName(option);
+        if (!util.target.isStage && target) {
+            if (args.FORWARD_BACKWARD === 'infront') {
+                util.target.goBehindOther(target);
+                util.target.goForwardLayers(1);
+            } else {
+                util.target.goBehindOther(target);
             }
         }
     }

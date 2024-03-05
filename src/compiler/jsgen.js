@@ -922,6 +922,8 @@ class JSGenerator {
             return new TypedInput(`target.isTouchingColor(colorToList(${this.descendInput(node.color).asColor()}))`, TYPE_BOOLEAN);
         case 'sensing.username':
             return new TypedInput('runtime.ioDevices.userData.getUsername()', TYPE_STRING);
+        case 'sensing.loggedin':
+            return new TypedInput('runtime.ioDevices.userData.getLoggedIn()', TYPE_STRING);
         case 'sensing.year':
             return new TypedInput(`(new Date().getFullYear())`, TYPE_NUMBER);
 
@@ -1426,6 +1428,23 @@ class JSGenerator {
         case 'looks.goToFront':
             if (!this.target.isStage) {
                 this.source += 'target.goToFront();\n';
+            }
+            break;
+        case 'looks.targetFront':
+            if (!this.target.isStage) {
+                const reqTarget = this.target.runtime.getSpriteTargetByName(node.layers.value);
+                if (reqTarget) {
+                    this.source += `target.goBehindOther(${JSON.stringify(reqTarget)});\n`;
+                    this.source += `target.goForwardLayers(1);\n`;
+                }
+            }
+            break;
+        case 'looks.targetBack':
+            if (!this.target.isStage) {
+                const reqTarget = this.target.runtime.getSpriteTargetByName(node.layers.value);
+                if (reqTarget && reqTarget.getLayerOrder() < this.target.getLayerOrder()) {
+                    this.source += `target.goBehindOther(${JSON.stringify(reqTarget)});\n`;
+                }
             }
             break;
         case 'looks.hide':

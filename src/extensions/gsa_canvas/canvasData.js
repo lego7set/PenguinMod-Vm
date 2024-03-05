@@ -24,6 +24,13 @@ class CanvasVar {
         this._skinId = this.renderer.createBitmapSkin(this.canvas, 1);
         this._monitorUpToDate = false;
         this._cachedMonContent = [null, 0];
+        this._cameraStuff = {
+            x: 0,
+            y: 0,
+            rotation: 0,
+            scaleX: 1,
+            scaleY: 1
+        };
         // img is just a size to be given to the canvas
         if (Array.isArray(img)) {
             this.size = img;
@@ -46,7 +53,8 @@ class CanvasVar {
     }
     toMonitorContent() {
         if (!this._monitorUpToDate) {
-            this._cachedMonContent = [this.getSnapshot(), this._cachedMonContent[1] + 1];
+            this._cachedMonContent = this.getSnapshot();
+            this._monitorUpToDate = true;
         }
         
         return this._cachedMonContent;
@@ -93,9 +101,11 @@ class CanvasVar {
         }
         if (typeof img === 'string') {
             await new Promise(resolve => {
-                img = new Image(img);
+                const src = img;
+                img = new Image();
                 img.onload = resolve;
                 img.onerror = resolve;
+                img.src = src;
             });
         }
 
@@ -103,6 +113,8 @@ class CanvasVar {
         this.canvas.height = img.height;
         const ctx = this.canvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
+        // do this cause we just added new content
+        this.updateCanvasContentRenders();
     }
 
     stampDrawable(id, x, y) {
@@ -148,7 +160,8 @@ class CanvasVar {
         this.stampDrawable(this._costumeDrawer);
     }
 
-    updateCanvasSkin() {
+    updateCanvasContentRenders() {
+        this._monitorUpToDate = false;
         // if width or height are smaller then one, replace them with one
         const width = Math.max(this.canvas.width, 1);
         const height = Math.max(this.canvas.height, 1);
