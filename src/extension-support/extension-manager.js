@@ -396,7 +396,7 @@ class ExtensionManager {
 
     /**
      * Load an extension by URL or internal extension ID
-     * @param {string} extensionURL - the URL for the extension to load OR the ID of an internal extension
+     * @param {string} normalURL - the URL for the extension to load OR the ID of an internal extension
      * @returns {Promise} resolved once the extension is loaded and initialized or rejected on failure
      */
     async loadExtensionURL(extensionURL) {
@@ -414,12 +414,14 @@ class ExtensionManager {
             throw new Error(`Invalid extension URL: ${extensionURL}`);
         }
 
+        const normalURL = extensionURL.replace("penguinmod.site", "penguinmod.com");
+
         this.runtime.setExternalCommunicationMethod('customExtensions', true);
 
         this.loadingAsyncExtensions++;
 
-        const sandboxMode = await this.securityManager.getSandboxMode(extensionURL);
-        const rewritten = await this.securityManager.rewriteExtensionURL(extensionURL);
+        const sandboxMode = await this.securityManager.getSandboxMode(normalURL);
+        const rewritten = await this.securityManager.rewriteExtensionURL(normalURL);
 
         if (sandboxMode === 'unsandboxed') {
             const { load } = require('./tw-unsandboxed-extension-runner');
@@ -427,7 +429,7 @@ class ExtensionManager {
                 .catch(error => this._failedLoadingExtensionScript(error));
             const fakeWorkerId = this.nextExtensionWorker++;
             const returnedIDs = [];
-            this.workerURLs[fakeWorkerId] = extensionURL;
+            this.workerURLs[fakeWorkerId] = normalURL;
 
             for (const extensionObject of extensionObjects) {
                 const extensionInfo = extensionObject.getInfo();
