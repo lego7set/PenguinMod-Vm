@@ -172,6 +172,10 @@ const defaultBuiltinExtensions = {
     // Camera: camera
     pmCamera: () => require('../extensions/pm_camera'),
 
+    // sharkpool: insert sharkpools epic introduction here
+    // sharkpoolPrinting: ...
+    sharkpoolPrinting: () => require("../extensions/sharkpool_printing"),
+
     // silvxrcat: ...
     // oddMessage: ...
     oddMessage: () => require("../extensions/silvxrcat_oddmessages"),
