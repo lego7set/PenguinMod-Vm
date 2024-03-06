@@ -17,6 +17,13 @@ const xmlEscape = function (unsafe) {
         }
     });
 };
+const delay = (ms) => {
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            resolve();
+        }, ms);
+    });
+};
 
 class sharkpoolPrinting {
     constructor(runtime) {
@@ -542,6 +549,7 @@ class sharkpoolPrinting {
                     }
                 }
             }
+            await delay(50); // browser tends to need just a little bit even after we waited for all the assets
             // packaged applications tend to require await on window prompts, print is a prompting api
             await printWindow.print();
             printWindow.close();
