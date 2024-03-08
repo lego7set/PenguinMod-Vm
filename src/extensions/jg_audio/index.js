@@ -202,7 +202,7 @@ class AudioExtension {
                     items: [
                         { text: "volume", value: "volume" },
                         { text: "speed", value: "speed" },
-                        { text: "pitch", value: "pitch" },
+                        { text: "detune", value: "pitch" },
                         { text: "pan", value: "pan" },
                     ]
                 },
@@ -241,7 +241,7 @@ class AudioExtension {
                     items: [
                         { text: "volume", value: "volume" },
                         { text: "speed", value: "speed" },
-                        { text: "pitch", value: "pitch" },
+                        { text: "detune", value: "pitch" },
                         { text: "pan", value: "pan" },
                     ]
                 },
@@ -259,7 +259,7 @@ class AudioExtension {
                     items: [
                         { text: "volume", value: "volume" },
                         { text: "speed", value: "speed" },
-                        { text: "pitch", value: "pitch" },
+                        { text: "detune", value: "pitch" },
                         { text: "pan", value: "pan" },
                         { text: "start position", value: "start position" },
                         { text: "sound length", value: "sound length" },
@@ -324,6 +324,7 @@ class AudioExtension {
             case "speed":
                 audioGroup.globalSpeed = Helper.Clamp(Helper.SafeNumberConvert(args.VALUE) / 100, 0, Infinity);
                 break;
+            case "detune":
             case "pitch":
                 audioGroup.globalPitch = Helper.SafeNumberConvert(args.VALUE);
                 break;
@@ -465,6 +466,7 @@ class AudioExtension {
             case "speed":
                 audioSource.speed = Helper.Clamp(Helper.SafeNumberConvert(args.VALUE) / 100, 0, Infinity);
                 break;
+            case "detune":
             case "pitch":
                 audioSource.pitch = Helper.SafeNumberConvert(args.VALUE);
                 break;
@@ -482,6 +484,7 @@ class AudioExtension {
                 return audioGroup.globalVolume * 100;
             case "speed":
                 return audioGroup.globalSpeed * 100;
+            case "detune":
             case "pitch":
                 return audioGroup.globalPitch;
             case "pan":
@@ -516,6 +519,7 @@ class AudioExtension {
                 return audioSource.volume * 100;
             case "speed":
                 return audioSource.speed * 100;
+            case "detune":
             case "pitch":
                 return audioSource.pitch;
             case "pan":
