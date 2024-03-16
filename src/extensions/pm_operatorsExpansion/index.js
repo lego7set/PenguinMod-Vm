@@ -669,11 +669,13 @@ class pmOperatorsExpansion {
                 }),
                 orIfFalsey: (generator, block) => ({
                     kind: 'input',
-                    num1: generator.descendInputOfBlock(block, 'num1')
+                    one: generator.descendInputOfBlock(block, 'ONE'),
+                    two: generator.descendInputOfBlock(block, 'TWO')
                 }),
                 ifIsTruthy: (generator, block) => ({
                     kind: 'input',
-                    num1: generator.descendInputOfBlock(block, 'num1')
+                    one: generator.descendInputOfBlock(block, 'ONE'),
+                    two: generator.descendInputOfBlock(block, 'TWO'),
                 })
             },
             js: {
@@ -713,14 +715,14 @@ class pmOperatorsExpansion {
                     return new TypedInput(`(~${num1})`, TYPE_NUMBER);
                 },
                 orIfFalsey: (node, compiler, {TypedInput, TYPE_UNKNOWN}) => {
-                    const num1 = compiler.descendInput(node.ONE).asUnknown();
-                    const num2 = compiler.descendInput(node.TWO).asUnknown();
+                    const num1 = compiler.descendInput(node.one).asUnknown();
+                    const num2 = compiler.descendInput(node.two).asUnknown();
                     
                     return new TypedInput(`(${num1} || ${num2})`, TYPE_UNKNOWN);
                 },
                 ifIsTruthy: (node, compiler, {TypedInput, TYPE_UNKNOWN}) => {
-                    const num1 = compiler.descendInput(node.ONE).asUnknown();
-                    const num2 = compiler.descendInput(node.TWO).asUnknown();
+                    const num1 = compiler.descendInput(node.one).asUnknown();
+                    const num2 = compiler.descendInput(node.two).asUnknown();
                     
                     return new TypedInput(`(${num1} && ${num2})`, TYPE_UNKNOWN);
                 }
