@@ -1699,7 +1699,7 @@ class JSGenerator {
             break;
         }
         case 'tempVars.deleteAll': {
-            this.source += `tempVars = {};`;
+            this.source += `tempVars = Object.create(null);`;
             break;
         }
         case 'tempVars.forEach': {
@@ -1934,7 +1934,7 @@ class JSGenerator {
             script += args.join(',');
         }
         script += ') {\n';
-        script += 'let tempVars = {};';
+        script += 'let tempVars = Object.create(null);';
 
         // pm: check if we are spoofing the target
         // ex: as (Sprite) {} block needs to replace the target
