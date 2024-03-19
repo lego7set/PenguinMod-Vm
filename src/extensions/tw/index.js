@@ -8,6 +8,7 @@ const iconURI = `data:image/svg+xml;base64,${btoa('<svg xmlns="http://www.w3.org
 
 /**
  * Class for TurboWarp blocks
+ * @deprecated Blocks have been moved to Sensing Expansion
  * @constructor
  */
 class TurboWarpBlocks {
