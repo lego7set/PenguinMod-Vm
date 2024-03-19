@@ -349,9 +349,9 @@ class AnimationExtension {
          * @type {Runtime}
          */
         this.runtime = runtime;
-        this.animations = Object.create({});
+        this.animations = Object.create(null);
         this.progressingTargets = [];
-        this.progressingTargetData = Object.create({});
+        this.progressingTargetData = Object.create(null);
 
         this.runtime.on('RUNTIME_PRE_PAUSED', () => {
             for (const targetId in this.progressingTargetData) {
@@ -1028,7 +1028,7 @@ class AnimationExtension {
         }
         if (!existingAnimationState) {
             // we are playing any animation, initialize data
-            const data = Object.create({});
+            const data = Object.create(null);
             this.progressingTargetData[id] = data;
             existingAnimationState = this.progressingTargetData[id];
         }

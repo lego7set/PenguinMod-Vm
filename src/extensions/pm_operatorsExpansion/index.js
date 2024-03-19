@@ -212,7 +212,7 @@ class pmOperatorsExpansion {
                 ...generateJoinTranslations(9, "字串組合", 1)
             }
         });
-        this.replacers = Object.create({});
+        this.replacers = Object.create(null);
         this.runtime.registerCompiledExtensionBlocks('pmOperatorsExpansion', this.getCompileInfo());
     }
 
@@ -920,7 +920,7 @@ class pmOperatorsExpansion {
         this.replacers[replacer] = text;
     }
     resetReplacers() {
-        this.replacers = Object.create({});
+        this.replacers = Object.create(null);
     }
     applyReplacers(args) {
         let text = Cast.toString(args.TEXT);

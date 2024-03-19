@@ -21,7 +21,7 @@ class JgRuntimeBlocks {
         this.runtime = runtime;
 
         // SharkPool
-        this.pausedScripts = Object.create({});
+        this.pausedScripts = Object.create(null);
 
         // ShovelUtils
         // Based on from https://www.growingwiththeweb.com/2017/12/fast-simple-js-fps-counter.html
@@ -36,7 +36,7 @@ class JgRuntimeBlocks {
             fps = times.length;
         });
         this.runtime.on('PROJECT_STOP_ALL', () => {
-            this.pausedScripts = Object.create({});
+            this.pausedScripts = Object.create(null);
         });
     }
 

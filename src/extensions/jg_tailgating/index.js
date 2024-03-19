@@ -10,9 +10,9 @@ class TailgatingExtension {
      */
     this.runtime = runtime;
 
-    this.trackers = Object.create({});
-    this.maxSaving = Object.create({});
-    this.positions = Object.create({});
+    this.trackers = Object.create(null);
+    this.maxSaving = Object.create(null);
+    this.positions = Object.create(null);
 
     const shouldSaveNewPosition = (positionsList, tracker) => {
       const firstPos = positionsList[0];
