@@ -177,12 +177,9 @@ const adapter = function (e) {
     // Validate input
     if (typeof e !== 'object') return;
     if (typeof e.xml !== 'object') return;
-    /*
-    // legact code of yeoldin times that we don eed
     const parser = new DOMParser();
     const doc = parser.parseFromString(e.xml.outerHTML, "application/xml");
-    */
-    return domToBlocks(e.xml);
+    return domToBlocks(doc.childNodes);
 };
 
 module.exports = adapter;
