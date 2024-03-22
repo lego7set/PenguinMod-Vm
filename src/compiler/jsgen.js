@@ -603,7 +603,7 @@ class JSGenerator {
             return new TypedInput(`${this.referenceVariable(node.list)}.value.length`, TYPE_NUMBER);
 
         case 'looks.size':
-            return new TypedInput('Math.round(target.size)', TYPE_NUMBER);
+            return new TypedInput('target.size', TYPE_NUMBER);
         case 'looks.tintColor':
             return new TypedInput('runtime.ext_scratch3_looks.getTintColor(null, { target: target })', TYPE_NUMBER);
         case 'looks.backdropName':
