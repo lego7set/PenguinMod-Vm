@@ -72,13 +72,12 @@ class Scratch3ControlBlocks {
         this.runtime.updateCurrentMSecs();
         this.runtime.ioDevices.clock.resetProjectTimer();
         this.runtime.targets.forEach(target => target.clearEdgeActivatedValues());
-        for (let i = 0; i < this.runtime.targets.length; i++) {
+        for (let i = this.runtime.targets.length - 1; i >= 0; i--) {
             const thisTarget = this.runtime.targets[i];
+            thisTarget.onGreenFlag();
             if (!thisTarget.isOriginal) {
                 this.runtime.disposeTarget(thisTarget);
                 this.runtime.stopForTarget(thisTarget);
-            } else {
-                thisTarget.onGreenFlag();
             }
         }
         this.runtime.startHats("event_whenflagclicked");
