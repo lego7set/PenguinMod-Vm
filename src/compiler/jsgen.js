@@ -646,6 +646,8 @@ class JSGenerator {
         case 'pmEventsExpansion.broadcastFunction':
             // we need to do function otherwise this block would be stupidly long
             let source = '(yield* (function*() {';
+            source += `var broadcastVar = runtime.getTargetForStage().lookupBroadcastMsg("", ${this.descendInput(node.broadcast).asString()} );`;
+            source += `if (broadcastVar) broadcastVar.isSent = true;`;
             const threads = this.localVariables.next();
             source += `var ${threads} = startHats("event_whenbroadcastreceived", { BROADCAST_OPTION: ${this.descendInput(node.broadcast).asString()} });`;
             const threadVar = this.localVariables.next();
@@ -677,6 +679,8 @@ class JSGenerator {
             // we need to do function otherwise this block would be stupidly long
             let source = '(yield* (function*() {';
             const threads = this.localVariables.next();
+            source += `var broadcastVar = runtime.getTargetForStage().lookupBroadcastMsg("", ${this.descendInput(node.broadcast).asString()} );`;
+            source += `if (broadcastVar) broadcastVar.isSent = true;`;
             source += `var ${threads} = startHats("event_whenbroadcastreceived", { BROADCAST_OPTION: ${this.descendInput(node.broadcast).asString()} });`;
             const threadVar = this.localVariables.next();
             source += `for (const ${threadVar} of ${threads}) { ${threadVar}.__evex_recievedDataa = ${this.descendInput(node.args).asString()} };`;
