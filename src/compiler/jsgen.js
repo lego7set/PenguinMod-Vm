@@ -1334,10 +1334,14 @@ class JSGenerator {
             this.isInHat = false;
             break;
         case 'event.broadcast':
+            this.source += `var broadcastVar = runtime.getTargetForStage().lookupBroadcastMsg("", ${this.descendInput(node.broadcast).asString()} );`;
+            this.source += `if (broadcastVar) broadcastVar.isSent = true;`;
             this.source += `startHats("event_whenbroadcastreceived", { BROADCAST_OPTION: ${this.descendInput(node.broadcast).asString()} });\n`;
             this.resetVariableInputs();
             break;
         case 'event.broadcastAndWait':
+            this.source += `var broadcastVar = runtime.getTargetForStage().lookupBroadcastMsg("", ${this.descendInput(node.broadcast).asString()} );`;
+            this.source += `if (broadcastVar) broadcastVar.isSent = true;`;
             this.source += `yield* waitThreads(startHats("event_whenbroadcastreceived", { BROADCAST_OPTION: ${this.descendInput(node.broadcast).asString()} }));\n`;
             this.yielded();
             break;
