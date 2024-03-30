@@ -49,6 +49,15 @@ class Scratch3EventBlocks {
         this.runtime.on('RUNTIME_STEP_START', () => {
             this.runtime.startHats('event_always');
         });
+
+        this.runtime.on("AFTER_EXECUTE", () => {
+            const stageVars = this.runtime.getTargetForStage().variables;
+            for (const key in stageVars) {
+                if (stageVars[key].isSent !== undefined) {
+                    stageVars[key].isSent = false;
+                }
+            }
+        });
     }
 
     /**
@@ -151,6 +160,7 @@ class Scratch3EventBlocks {
             args.BROADCAST_OPTION.id, args.BROADCAST_OPTION.name);
         if (broadcastVar) {
             const broadcastOption = broadcastVar.name;
+            broadcastVar.isSent = true;
             util.startHats('event_whenbroadcastreceived', {
                 BROADCAST_OPTION: broadcastOption
             });
@@ -166,6 +176,7 @@ class Scratch3EventBlocks {
             const broadcastOption = util.stackFrame.broadcastVar.name;
             // Have we run before, starting threads?
             if (!util.stackFrame.startedThreads) {
+                broadcastVar.isSent = true;
                 // No - start hats for this broadcast.
                 util.stackFrame.startedThreads = util.startHats(
                     'event_whenbroadcastreceived', {
