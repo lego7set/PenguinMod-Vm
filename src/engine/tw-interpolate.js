@@ -11,15 +11,15 @@ const setupInitialState = runtime => {
         const directionAndScale = target._getRenderedDirectionAndScale();
 
         // If sprite may have been interpolated in the previous frame, reset its renderer state.
-        // If sprite may have been interpolated in the previous frame, reset its renderer state.
         if (renderer && target.interpolationData) {
             const drawableID = target.drawableID;
-            renderer.updateDrawablePosition(drawableID, [target.x, target.y]);
-            renderer.updateDrawableDirectionScale(drawableID, directionAndScale.direction, directionAndScale.scale);
+            const camData = runtime.getCamera();
+            renderer.updateDrawablePosition(drawableID, [target.x + camData.pos[0], target.y + camData.pos[1]]);
+            renderer.updateDrawableDirectionScale(drawableID, directionAndScale.direction + camData.dir, directionAndScale.scale * camData.scale);
             renderer.updateDrawableEffect(drawableID, 'ghost', target.effects.ghost);
         }
         /*
-        TODO: Old Broken Code? revert if above doesnt work or smt
+        TODO: Old Broken Code. revert if above doesnt work or smt
         if (renderer && target.interpolationData) {
             target.updateAllDrawableProperties();
         }*/
