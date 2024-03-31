@@ -14,9 +14,8 @@ const setupInitialState = runtime => {
         if (renderer && target.interpolationData) {
             const drawableID = target.drawableID;
             const camData = runtime.getCamera();
-            const fixedScale = isNaN(camData.scale) || !camData.scale ? 1 : camData.scale;
             renderer.updateDrawablePosition(drawableID, [target.x + camData.pos[0], target.y + camData.pos[1]]);
-            renderer.updateDrawableDirectionScale(drawableID, directionAndScale.direction + camData.dir, directionAndScale.scale * fixedScale);
+            renderer.updateDrawableDirectionScale(drawableID, directionAndScale.direction + camData.dir, [directionAndScale.scale[0] * camData.scale, directionAndScale.scale[1] * camData.scale]);
             renderer.updateDrawableEffect(drawableID, 'ghost', target.effects.ghost);
         }
         /*
