@@ -26,10 +26,10 @@ const setupInitialState = runtime => {
 
         if (target.visible && !target.isStage) {
             target.interpolationData = {
-                x: target.x + camData.pos[0],
-                y: target.y + camData.pos[1],
-                direction: directionAndScale.direction + camData.dir,
-                scale: [directionAndScale.scale[0] * camData.scale, directionAndScale.scale[1] * camData.scale],
+                x: target.x,
+                y: target.y,
+                direction: directionAndScale.direction,
+                scale: directionAndScale.scale,
                 costume: target.currentCostume,
                 ghost: target.effects.ghost
             };
@@ -66,7 +66,7 @@ const interpolate = (runtime, time) => {
         const drawableID = target.drawableID;
 
         // Position interpolation.
-        const [icpX, icpY] = target.cameraBound >= 0 
+        const [icpX, icpY] = 6 /*target.cameraBound*/ >= 0 
             ? translateForCamera(runtime, target.cameraBound, interpolationData.x, interpolationData.y)
             : [interpolationData.x, interpolationData.y];
         const [tX, tY] = target._translatePossitionToCamera();
