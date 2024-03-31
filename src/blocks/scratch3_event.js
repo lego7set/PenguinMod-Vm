@@ -51,12 +51,13 @@ class Scratch3EventBlocks {
         });
 
         this.runtime.on("AFTER_EXECUTE", () => {
-            const stageVars = this.runtime.getTargetForStage().variables;
-            for (const key in stageVars) {
-                if (stageVars[key].isSent !== undefined) {
-                    stageVars[key].isSent = false;
+            // Use a timeout as regular Block Threads and Events Blocks dont run at the Same Speed
+            setTimeout(() => {
+                const stageVars = this.runtime.getTargetForStage().variables;
+                for (const key in stageVars) {
+                    if (stageVars[key].isSent !== undefined) stageVars[key].isSent = false;
                 }
-            }
+            }, 10);
         });
     }
 
