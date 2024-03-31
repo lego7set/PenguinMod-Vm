@@ -26,10 +26,10 @@ const setupInitialState = runtime => {
 
         if (target.visible && !target.isStage) {
             target.interpolationData = {
-                x: target.x,
-                y: target.y,
-                direction: directionAndScale.direction,
-                scale: directionAndScale.scale,
+                x: target.x + camData.pos[0],
+                y: target.y + camData.pos[1],
+                direction: directionAndScale.direction + camData.dir,
+                scale: [directionAndScale.scale[0] * camData.scale, directionAndScale.scale[1] * camData.scale],
                 costume: target.currentCostume,
                 ghost: target.effects.ghost
             };
