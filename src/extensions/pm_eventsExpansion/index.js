@@ -164,9 +164,21 @@ class pmEventsExpansion {
                     }
                 },
                 {
+                    opcode: 'isBroadcastReceived',
+                    text: 'is message [BROADCAST] received?',
+                    blockType: BlockType.BOOLEAN,
+                    arguments: {
+                        BROADCAST: {
+                            type: ArgumentType.STRING,
+                            defaultValue: "your not supposed to see this?"
+                        }
+                    }
+                },
+                {
                     opcode: 'recievedDataReporter',
                     text: 'recieved data',
                     blockType: BlockType.REPORTER,
+                    allowDropAnywhere: true,
                     disableMonitor: true
                 },
                 {
@@ -189,6 +201,7 @@ class pmEventsExpansion {
                     text: 'broadcast [BROADCAST] and wait',
                     blockType: BlockType.REPORTER,
                     disableMonitor: true,
+                    allowDropAnywhere: true,
                     arguments: {
                         BROADCAST: {
                             type: ArgumentType.STRING,
@@ -220,6 +233,7 @@ class pmEventsExpansion {
                     text: 'broadcast [BROADCAST] with data [ARGS] and wait',
                     blockType: BlockType.REPORTER,
                     disableMonitor: true,
+                    allowDropAnywhere: true,
                     arguments: {
                         BROADCAST: {
                             type: ArgumentType.STRING,
