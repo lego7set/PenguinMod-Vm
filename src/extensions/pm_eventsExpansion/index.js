@@ -167,6 +167,7 @@ class pmEventsExpansion {
                     opcode: 'isBroadcastReceived',
                     text: 'is message [BROADCAST] received?',
                     blockType: BlockType.BOOLEAN,
+                    hideFromPalette: true,
                     arguments: {
                         BROADCAST: {
                             type: ArgumentType.STRING,
