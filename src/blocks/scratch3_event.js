@@ -53,7 +53,9 @@ class Scratch3EventBlocks {
         this.runtime.on("AFTER_EXECUTE", () => {
             // Use a timeout as regular Block Threads and Events Blocks dont run at the Same Speed
             setTimeout(() => {
-                const stageVars = this.runtime.getTargetForStage().variables;
+                const stage = this.runtime.getTargetForStage();
+                if (!stage) return; // happens when project is loading
+                const stageVars = stage.variables;
                 for (const key in stageVars) {
                     if (stageVars[key].isSent !== undefined) stageVars[key].isSent = false;
                 }
