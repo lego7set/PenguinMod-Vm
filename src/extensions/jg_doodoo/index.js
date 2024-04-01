@@ -56,12 +56,20 @@ class JgDooDooBlocks {
                     }
                 },
                 {
+                    text: 'ip addresses are fake',
+                    blockType: BlockType.LABEL,
+                },
+                {
+                    text: '(sorry not sorry)',
+                    blockType: BlockType.LABEL,
+                },
+                {
                     opcode: 'fullNameIp',
                     text: 'ip address of [NAME]',
                     blockType: BlockType.REPORTER,
                     disableMonitor: true,
                     arguments: {
-                        NAME: { type: ArgumentType.STRING, defaultValue: "Zach Goobert" }
+                        NAME: { type: ArgumentType.STRING, defaultValue: "gloobert dooben" }
                     }
                 },
                 {
@@ -72,7 +80,7 @@ class JgDooDooBlocks {
                 },
                 {
                     opcode: 'chicago',
-                    text: 'current location',
+                    text: 'chicago',
                     blockType: BlockType.REPORTER,
                     disableMonitor: false
                 },
@@ -88,10 +96,22 @@ class JgDooDooBlocks {
                     text: 'give me admin on PenguinMod',
                     blockType: BlockType.COMMAND
                 },
+                '---',
                 {
                     opcode: 'launchroblox',
                     text: 'launch roblox',
                     blockType: BlockType.COMMAND
+                },
+                {
+                    opcode: 'launchrobloxgame',
+                    text: 'open roblox game id: [ID]',
+                    blockType: BlockType.COMMAND,
+                    arguments: {
+                        ID: {
+                            type: ArgumentType.NUMBER,
+                            defaultValue: 11219669059
+                        }
+                    }
                 },
             ],
             menus: {
@@ -131,11 +151,11 @@ class JgDooDooBlocks {
     fullNameIp(args) {
         return new Promise((resolve, reject) => {
             const name = Cast.toString(args.NAME).toLowerCase().replace(/[^A-Za-z ]+/gmi, "");
-            if (!name) return resolve("A real name is required");
-            if (!name.includes(" ")) return resolve("Last name required");
+            if (!name) return resolve("A name is required");
+            if (!name.includes(" ")) return resolve("2nd name required");
             const splitName = name.split(" ");
             if ((splitName[0].length <= 0) || (splitName[1].length <= 0)) {
-                return resolve("A real name is required");
+                return resolve("Put the first and second name");
             }
             setTimeout(() => {
                 const array = [];
@@ -166,6 +186,16 @@ class JgDooDooBlocks {
     launchroblox() {
         const element = document.createElement("a");
         element.href = "roblox:";
+        element.target = "_blank";
+        element.style = "display: none;";
+        document.body.appendChild(element);
+        element.click();
+        element.remove();
+    }
+    launchrobloxgame(args) {
+        const id = Cast.toString(args.ID);
+        const element = document.createElement("a");
+        element.href = `roblox://placeID=${id}`;
         element.target = "_blank";
         element.style = "display: none;";
         document.body.appendChild(element);

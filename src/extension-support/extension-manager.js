@@ -121,6 +121,8 @@ const defaultBuiltinExtensions = {
     jgDev: () => require("../extensions/jg_dev"),
     // jgDooDoo: test extension used for making test extensions
     jgDooDoo: () => require("../extensions/jg_doodoo"),
+    // jgBestExtension: great extension used for making great extensions
+    jgBestExtension: () => require("../extensions/jg_bestextensioin"),
     // jgChristmas: Christmas extension used for making Christmas extensions
     jgChristmas: () => require("../extensions/jg_christmas"),
 
