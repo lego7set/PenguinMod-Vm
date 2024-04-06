@@ -205,6 +205,8 @@ const defaultBuiltinExtensions = {
     // fr: waw 3d physics!!
     // fr3d:
     fr3d: () => require('../extensions/fr_3d'),
+
+    typescratch: () => require('../extensions/typescratch')
 };
 
 const coreExtensionList = Object.getOwnPropertyNames(defaultBuiltinExtensions);
