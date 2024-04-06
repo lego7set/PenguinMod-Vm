@@ -206,7 +206,10 @@ const defaultBuiltinExtensions = {
     // fr3d:
     fr3d: () => require('../extensions/fr_3d'),
 
-    typescratch: () => require('../extensions/typescratch')
+    typescratch: () => require('../extensions/typescratch'),
+
+    // lego7set: i swear if this breaks again...
+    vgspenguinscript: () => require('../extensions/vgs_penguinscript')
 };
 
 const coreExtensionList = Object.getOwnPropertyNames(defaultBuiltinExtensions);
