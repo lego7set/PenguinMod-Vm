@@ -205,9 +205,6 @@ const defaultBuiltinExtensions = {
     // fr: waw 3d physics!!
     // fr3d:
     fr3d: () => require('../extensions/fr_3d'),
-
-    // vgs: also lego7set
-    vgspenguinscript: () => require('../extensions/vgs_penguinscript')
 };
 
 const coreExtensionList = Object.getOwnPropertyNames(defaultBuiltinExtensions);
