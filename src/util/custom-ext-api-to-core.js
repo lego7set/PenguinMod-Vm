@@ -133,6 +133,7 @@ class CustomExtensionApi {
     get extensions () {
         return {
             unsandboxed: true,
+            isPenguinMod: true,
             register: () => {
                 throw new Error("Register cannot be replicated in custom-ext-api-to-core");
             }
