@@ -209,7 +209,6 @@ const defaultBuiltinExtensions = {
     typescratch: () => require('../extensions/typescratch'),
 
     // lego7set: i swear if this breaks again...
-    vgspenguinscript: () => require('../extensions/vgs_penguinscript')
 };
 
 const coreExtensionList = Object.getOwnPropertyNames(defaultBuiltinExtensions);
