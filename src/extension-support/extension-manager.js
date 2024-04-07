@@ -208,6 +208,12 @@ const defaultBuiltinExtensions = {
 
     typescratch: () => require('../extensions/typescratch'),
 
+    scratch2maqueen: () => require('../extensions/scratch3_scratch2maqueen'),
+
+    scratch2webserialapi: () => require('../extensions/scratch2webserialapi'),
+
+    adabrowser: () => require('../extensions/scratch3_adabrowser'),
+
     // lego7set: i swear if this breaks again...
 };
 
