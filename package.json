@@ -54,6 +54,7 @@
     "scratch-sb1-converter": "0.2.7",
     "scratch-translate-extension-languages": "0.0.20191118205314",
     "simplex-noise": "^4.0.1",
+    "sweetalert": "^2.1.2",
     "text-encoding": "0.7.0",
     "three": "0.153.0",
     "three-mesh-bvh": "0.6.0",
