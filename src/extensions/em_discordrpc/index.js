@@ -194,7 +194,10 @@ class DiscordRPC {
         if (this.client.readyAt && this.enabled) {
             this.updatePresence();
         }
+        // Se reconnecter avec le nouvel ID de l'application Discord
+        this.client.login({ clientId: this.applicationID }).catch(console.error);
     }
+    
 
     setDetails(args) {
         this.details = args.DETAILS;
