@@ -16,7 +16,13 @@ class DiscordRPC {
         this.client = new Client({ transport: 'ipc' });
         this.applicationID = 1226598637086310431; // Default application ID (Client ID)
         this.buttons = [];
-
+        this.largeimagekey = 'main'; // Default value for large image key
+        this.smallimagekey = 'logo'; // Default value for small image key
+        this.smallimagetext = 'Powered by ElectraMod'; // Default value for small image text
+        this.largeimagetext = 'Discord RPC Example in Scratch'; // Default value for large image text
+        this.details = 'ElectraMod is a mod of PenguinMod which is a mod of Turbowarp which is a mod of Scratch';
+        this.state = 'This is a test';
+    
         this.client.once('ready', () => {
             console.log(`Logged in as ${this.client.user.username}!`);
             if (this.applicationID && this.enabled) {
@@ -24,6 +30,7 @@ class DiscordRPC {
             }
         });
     }
+    
 
     /**
      * @returns {object} metadata for this extension and its blocks.
@@ -149,7 +156,7 @@ class DiscordRPC {
                         SET_OPTION: {
                             type: ArgumentType.STRING,
                             menu: 'set_options',
-                            defaultValue: 'setOnlyOneButton'
+                            defaultValue: 'set only one button'
                         },
                         LABEL1: {
                             type: ArgumentType.STRING,
@@ -171,7 +178,7 @@ class DiscordRPC {
                 }
             ],
             menus: {
-                set_options: ['setOnlyOneButton', 'setTwoButtons', "dontSetButton"],
+                set_options: ['set only one button', 'set two buttons', "don't set button"],
                 button_value: ['button1', 'button2'],
                 value_type: ['label', 'link']
             }
@@ -247,11 +254,11 @@ class DiscordRPC {
         const { SET_OPTION, LABEL1, LINK1, LABEL2, LINK2 } = args;
         this.buttons = [];
         
-        if (SET_OPTION === 'setOnlyOneButton') {
+        if (SET_OPTION === 'set only one button') {
             if (LABEL1 && LINK1) {
                 this.buttons.push({ label: LABEL1, url: LINK1 });
             }
-        } else if (SET_OPTION === 'setTwoButtons') {
+        } else if (SET_OPTION === 'set two buttons') {
             if (LABEL1 && LINK1) {
                 this.buttons.push({ label: LABEL1, url: LINK1 });
             }
@@ -259,7 +266,7 @@ class DiscordRPC {
                 this.buttons.push({ label: LABEL2, url: LINK2 });
             }
         }
-        // Si l'option est 'dontSetButton', aucun bouton n'est ajouté
+        // Si l'option est 'don't set button', aucun bouton n'est ajouté
     
         // Utilisez les détails des boutons (dans le tableau buttons) comme vous le souhaitez
         console.log('Buttons:', this.buttons);
