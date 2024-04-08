@@ -24,6 +24,8 @@ class DiscordRPC {
         this.state = 'This is a test';
         this.enabled = true;
     
+        // Utilisation de this.applicationID au lieu de applicationID
+        this.client.login({ clientId: this.applicationID }).catch(console.error);
         this.client.once('ready', () => {
             console.log(`Logged in as ${this.client.user.username}!`);
             if (this.applicationID && this.enabled) {
