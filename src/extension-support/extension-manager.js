@@ -222,7 +222,8 @@ const defaultBuiltinExtensions = {
     onegpioRoboHAT: () => require('../extensions/scratch3_onegpioRoboHAT'),
     onegpioRpiPico: () => require('../extensions/scratch3_onegpioRpiPico'),
 
-    // lego7set: i swear if this breaks again...
+    em_discordrpc: () => require('../extensions/em_discordrpc'),
+
 };
 
 const coreExtensionList = Object.getOwnPropertyNames(defaultBuiltinExtensions);
