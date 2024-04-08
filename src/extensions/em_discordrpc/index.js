@@ -22,6 +22,7 @@ class DiscordRPC {
         this.largeimagetext = 'Discord RPC Example in Scratch'; // Default value for large image text
         this.details = 'ElectraMod is a mod of PenguinMod which is a mod of Turbowarp which is a mod of Scratch';
         this.state = 'This is a test';
+        this.enabled = true;
     
         this.client.once('ready', () => {
             console.log(`Logged in as ${this.client.user.username}!`);

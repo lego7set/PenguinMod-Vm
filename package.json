@@ -32,6 +32,7 @@
     "@turbowarp/json": "^0.1.2",
     "@vernier/godirect": "1.5.0",
     "arraybuffer-loader": "^1.0.6",
+    "arrpc": "^3.3.1",
     "atob": "2.1.2",
     "btoa": "1.2.1",
     "cannon-es": "0.20.0",
