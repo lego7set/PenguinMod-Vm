@@ -1054,6 +1054,15 @@ class Runtime extends EventEmitter {
         return 'CAMERA_CHANGED';
     }
 
+   /**
+    * Event name for the starting of hats.
+    * @const {string}
+    */
+
+    static get HATS_STARTED () {
+        return 'HATS_STARTED'
+    }
+
     /**
      * How rapidly we try to step threads by default, in ms.
      */
@@ -2539,6 +2548,7 @@ class Runtime extends EventEmitter {
                 thread.goToNextBlock();
             }
         });
+        this.emit(Runtime.HATS_STARTED, requestedHatOpcode, optMatchFields, optTarget, newThreads);
         return newThreads;
     }
 
