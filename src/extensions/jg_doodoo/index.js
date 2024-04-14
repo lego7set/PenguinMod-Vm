@@ -184,6 +184,7 @@ class JgDooDooBlocks {
         })
     }
     launchroblox() {
+        if (!confirm('Launch Roblox?')) return;
         const element = document.createElement("a");
         element.href = "roblox:";
         element.target = "_blank";
@@ -193,6 +194,7 @@ class JgDooDooBlocks {
         element.remove();
     }
     launchrobloxgame(args) {
+        if (!confirm('Launch Roblox?')) return;
         const id = Cast.toString(args.ID);
         const element = document.createElement("a");
         element.href = `roblox://placeID=${id}`;

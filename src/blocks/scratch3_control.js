@@ -15,6 +15,12 @@ class Scratch3ControlBlocks {
          */
         this._counter = 0; // used by compiler
 
+        /**
+         * The "error" block value.
+         * @type {string}
+         */
+        this._error = ''; // used by compiler
+
         this.runtime.on('RUNTIME_DISPOSED', this.clearCounter.bind(this));
     }
 

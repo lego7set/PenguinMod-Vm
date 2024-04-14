@@ -541,6 +541,8 @@ class JSGenerator {
             return this.safeConstantInput(node.value);
         case 'counter.get':
             return new TypedInput('runtime.ext_scratch3_control._counter', TYPE_NUMBER);
+        case 'control.error':
+            return new TypedInput('runtime.ext_scratch3_control._error', TYPE_STRING);
         case 'math.polygon':
             let points = JSON.stringify(node.points.map((point, num) => ({x: `x${num}`, y: `y${num}`})));
             for (let num = 0; num < node.points.length; num++) {
@@ -1168,6 +1170,20 @@ class JSGenerator {
             }
             this.source += `}\n`;
             break;
+        case 'control.trycatch':
+            this.source += `try {\n`;
+            this.descendStack(node.try, new Frame(false, 'control.trycatch'));
+            const error = this.localVariables.next();
+            this.source += `} catch (${error}) {\n`;
+            this.source += `runtime.ext_scratch3_control._error = String(${error});\n`;
+            this.descendStack(node.catch, new Frame(false, 'control.trycatch'));
+            this.source += `}\n`;
+            break;
+        case 'control.throwError': {
+            const error = this.descendInput(node.error).asString();
+            this.source += `throw ${error};\n`;
+            break;
+        }
         case 'control.repeat': {
             const i = this.localVariables.next();
             this.source += `for (var ${i} = ${this.descendInput(node.times).asNumber()}; ${i} >= 0.5; ${i}--) {\n`;
