@@ -112,23 +112,23 @@ class Scratch3SensingBlocks {
     getOS () {
         if (!('userAgent' in navigator)) return 'Unknown';
         const agent = navigator.userAgent;
-        if (agent.includes('Mac OS')) {
-            return 'MacOS';
-        }
-        if (agent.includes('CrOS')) {
-            return 'ChromeOS';
-        }
-        if (agent.includes('Linux')) {
-            return 'Linux';
-        }
         if (agent.includes('Windows')) {
             return 'Windows';
+        }
+        if (agent.includes('Android')) {
+            return 'Android';
         }
         if (agent.includes('iPad') || agent.includes('iPod') || agent.includes('iPhone')) {
             return 'iOS';
         }
-        if (agent.includes('Android')) {
-            return 'Android';
+        if (agent.includes('Linux')) {
+            return 'Linux';
+        }
+        if (agent.includes('CrOS')) {
+            return 'ChromeOS';
+        }
+        if (agent.includes('Mac OS')) {
+            return 'MacOS';
         }
         return 'Unknown';
     }
