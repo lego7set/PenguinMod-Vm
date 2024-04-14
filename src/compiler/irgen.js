@@ -274,6 +274,10 @@ class ScriptTreeGenerator {
             return {
                 kind: 'counter.get'
             };
+        case 'control_error':
+            return {
+                kind: 'control.error'
+            };
 
         case 'data_variable':
             return {
@@ -1022,6 +1026,17 @@ class ScriptTreeGenerator {
                 condition: this.descendInputOfBlock(block, 'CONDITION'),
                 whenTrue: this.descendSubstack(block, 'SUBSTACK'),
                 whenFalse: this.descendSubstack(block, 'SUBSTACK2')
+            };
+        case 'control_try_catch':
+            return {
+                kind: 'control.trycatch',
+                try: this.descendSubstack(block, 'SUBSTACK'),
+                catch: this.descendSubstack(block, 'SUBSTACK2')
+            };
+        case 'control_throw_error':
+            return {
+                kind: 'control.throwError',
+                error: this.descendInputOfBlock(block, 'ERROR'),
             };
         case 'control_incr_counter':
             return {

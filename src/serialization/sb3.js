@@ -815,8 +815,19 @@ const serialize = function (runtime, targetId, {allowOptimization = true} = {}) 
         const extensionURLs = getExtensionURLsToSave(extensions, runtime);
         target.extensions = extensions;
         if (extensionURLs) {
-            obj.extensionURLs = extensionURLs;
+            target.extensionURLs = extensionURLs;
         }
+
+        // add extension datas
+        target.extensionData = {};
+        for (const extension of extensions) {
+            if (`ext_${extension}` in runtime) {
+                if (typeof runtime[`ext_${extension}`].serialize === 'function') {
+                    target.extensionData[extension] = runtime[`ext_${extension}`].serialize();
+                }
+            }
+        }
+
         if (fonts) {
             target.customFonts = fonts;
         }
@@ -1403,9 +1414,10 @@ const parseScratchObject = function (object, runtime, extensions, zip, assets) {
     if (object.hasOwnProperty('draggable')) {
         target.draggable = object.draggable;
     }
-    if (object.hasOwnProperty('id')) {
-        target.id = object.id;
-    }
+    // TODO: figure out why this line was added, since this currently breaks sprite importing if the sprites have the same ID
+    // if (object.hasOwnProperty('id')) {
+    //     target.id = object.id;
+    // }
     Promise.all(costumePromises).then(costumes => {
         sprite.costumes = costumes;
     });
