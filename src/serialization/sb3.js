@@ -1414,10 +1414,10 @@ const parseScratchObject = function (object, runtime, extensions, zip, assets) {
     if (object.hasOwnProperty('draggable')) {
         target.draggable = object.draggable;
     }
-    // TODO: figure out why this line was added, since this currently breaks sprite importing if the sprites have the same ID
-    // if (object.hasOwnProperty('id')) {
-    //     target.id = object.id;
-    // }
+    const existingTargetIds = runtime.targets.map(target => target.id);
+    if (object.hasOwnProperty('id') && !existingTargetIds.includes(object.id)) {
+        target.id = object.id;
+    }
     Promise.all(costumePromises).then(costumes => {
         sprite.costumes = costumes;
     });

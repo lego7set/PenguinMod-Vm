@@ -395,6 +395,10 @@ class JgDevBlocks {
         return (menu.length > 0) ? menu : emptyMenu;
     }
 
+    branchIndicatorTest() {
+        return; // dude logs wont shut up because i didnt define this func
+    }
+
     // util
     _getSoundIndex(soundName, util) {
         // if the sprite has no sounds, return -1
