@@ -1,208 +1,205 @@
-const formatMessage = require('format-message');
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
 const Cast = require('../../util/cast');
 
-/**
- * Class for Script blocks
- * @constructor
- */
 class JgScriptsBlocks {
-    constructor(runtime) {
-        /**
-         * The runtime instantiating this block package.
-         * @type {Runtime}
-         */
-        this.runtime = runtime;
-
-        this.scripts = {};
-
-        // register compiled blocks
-        this.runtime.registerCompiledExtensionBlocks('jgScripts', this.getCompileInfo());
-    }
-
-    getExtension_() {
-        return `runtime.ext_jgScripts`;
-    }
-
+  /**
+   * Class for Script blocks
+   * @constructor
+   */
+  constructor(runtime) {
     /**
-     * @returns {object} metadata for this extension and its blocks.
+     * The runtime instantiating this block package.
+     * @type {Runtime}
      */
-    getInfo() {
-        return {
-            id: 'jgScripts',
-            name: 'Scripts',
-            color1: '#8c8c8c',
-            color2: '#7a7a7a',
-            blocks: [
-                {
-                    opcode: 'createScript',
-                    text: formatMessage({
-                        id: 'jgScripts.blocks.createScript',
-                        default: 'create script named [NAME]',
-                        description: "Block that creates a blank script with the specified name."
-                    }),
-                    arguments: {
-                        NAME: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "Script1"
-                        }
-                    },
-                    blockType: BlockType.COMMAND
-                },
-                {
-                    opcode: 'deleteScript',
-                    text: formatMessage({
-                        id: 'jgScripts.blocks.deleteScript',
-                        default: 'delete script named [NAME]',
-                        description: "Block that deletes a script with the specified name."
-                    }),
-                    arguments: {
-                        NAME: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "Script1"
-                        }
-                    },
-                    blockType: BlockType.COMMAND
-                },
-                {
-                    opcode: 'scriptExists',
-                    text: formatMessage({
-                        id: 'jgScripts.blocks.scriptExists',
-                        default: 'script named [NAME] exists?',
-                        description: "Block that checks whether a script with the specified name exists."
-                    }),
-                    arguments: {
-                        NAME: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "Script1"
-                        }
-                    },
-                    blockType: BlockType.BOOLEAN
-                },
-                '---',
-                {
-                    opcode: 'addBlocksTo',
-                    text: [
-                        formatMessage({
-                            id: 'jgScripts.blocks.addBlocksTo1',
-                            default: 'add blocks',
-                            description: "Block that sets a script to the inserted blocks."
-                        }),
-                        formatMessage({
-                            id: 'jgScripts.blocks.addBlocksTo2',
-                            default: 'to script [NAME]',
-                            description: "Block that sets a script to the inserted blocks."
-                        }),
-                    ],
-                    branchCount: 1,
-                    arguments: {
-                        NAME: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "Script1"
-                        }
-                    },
-                    blockType: BlockType.COMMAND
-                },
-                {
-                    opcode: 'runBlocks',
-                    text: formatMessage({
-                        id: 'jgScripts.blocks.runBlocks',
-                        default: 'run script [NAME]',
-                        description: "Block that runs a script."
-                    }),
-                    arguments: {
-                        NAME: {
-                            type: ArgumentType.STRING,
-                            defaultValue: "Script1"
-                        }
-                    },
-                    blockType: BlockType.COMMAND
-                },
-            ]
-        };
-    }
-    /**
-     * This function is used for any compiled blocks in the extension if they exist.
-     * Data in this function is given to the IR & JS generators.
-     * Data must be valid otherwise errors may occur.
-     * @returns {object} functions that create data for compiled blocks.
-     */
-    getCompileInfo() {
-        return {
-            ir: {
-                createScript: (generator, block) => ({
-                    kind: 'stack',
-                    name: generator.descendInputOfBlock(block, 'NAME'),
-                }),
-                deleteScript: (generator, block) => ({
-                    kind: 'stack',
-                    name: generator.descendInputOfBlock(block, 'NAME'),
-                }),
-                scriptExists: (generator, block) => ({
-                    kind: 'input',
-                    name: generator.descendInputOfBlock(block, 'NAME'),
-                }),
-                addBlocksTo: (generator, block) => ({
-                    kind: 'stack',
-                    name: generator.descendInputOfBlock(block, 'NAME'),
-                    blocks: generator.descendSubstack(block, 'SUBSTACK'),
-                }),
-                // TODO: this block should cause the script to always recompile
-                runBlocks: (generator, block) => ({
-                    kind: 'stack',
-                    name: generator.descendInputOfBlock(block, 'NAME'),
-                }),
-            },
-            js: {
-                createScript: (node, compiler, imports) => {
-                    const name = compiler.descendInput(node.name).asString();
-                    compiler.source += `${this.getExtension_()}.scripts[${name}] = [];\n`;
-                },
-                deleteScript: (node, compiler, imports) => {
-                    const name = compiler.descendInput(node.name).asString();
-                    compiler.source += `delete ${this.getExtension_()}.scripts[${name}];\n`;
-                },
-                scriptExists: (node, compiler, imports) => {
-                    const name = compiler.descendInput(node.name).asString();
-                    return new imports.TypedInput(`(${name} in ${this.getExtension_()}.scripts)`, imports.TYPE_BOOLEAN);
-                },
-                addBlocksTo: (node, compiler, imports) => {
-                    const name = compiler.descendInput(node.name).asString();
-                    const blocks = JSON.stringify(node.blocks); // dont compile, save the node
+    this.runtime = runtime;
+    this.scripts = {};
 
-                    const scriptObject = `${this.getExtension_()}.scripts[${name}]`;
-                    compiler.source += `if (${scriptObject}) {\n`;
-                    compiler.source += `${scriptObject} = [].concat(${scriptObject}, ${blocks});\n`;
-                    compiler.source += `}\n`;
-                },
-                // TODO: this block should cause the script to always recompile
-                runBlocks: (node, compiler, imports) => {
-                    const name = compiler.descendInput(node.name).asString();
-                    const realName = eval(name); // do we really need to use eval for this?
-                    const realScriptObject = this.scripts[realName];
-                    if (realScriptObject) {
-                        compiler.source += `{\n`; // new grouping
-                        compiler.descendStack(realScriptObject, new imports.Frame(false));
-                        compiler.source += `}\n`;
-                    }
-                },
-            }
+    this.runtime.on("PROJECT_START", () => { this.scripts = {} });
+    this.runtime.on("PROJECT_STOP_ALL", () => { this.scripts = {} });
+  }
+  /**
+   * @returns {object} metadata for this extension and its blocks.
+  */
+  getInfo() {
+    return {
+      id: "jgScripts",
+      name: "Scripts",
+      color1: "#8c8c8c",
+      color2: "#7a7a7a",
+      blocks: [{
+          opcode: "createScript",
+          blockType: BlockType.COMMAND,
+          text: "create script named [NAME]",
+          arguments: {
+            NAME: { type: ArgumentType.STRING, defaultValue: "Script1" }
+          },
+        },
+        {
+          opcode: "deleteScript",
+          blockType: BlockType.COMMAND,
+          text: "delete script named [NAME]",
+          arguments: {
+            NAME: { type: ArgumentType.STRING, defaultValue: "Script1" }
+          },
+        },
+        {
+          opcode: "deleteAll",
+          blockType: BlockType.COMMAND,
+          text: "delete all scripts"
+        },
+        {
+          opcode: "allScripts",
+          blockType: BlockType.REPORTER,
+          text: "all scripts"
+        },
+        {
+          opcode: "scriptExists",
+          blockType: BlockType.BOOLEAN,
+          text: "script named [NAME] exists?",
+          arguments: {
+            NAME: { type: ArgumentType.STRING, defaultValue: "Script1" }
+          },
+        },
+        "---",
+        {
+          opcode: "addBlocksTo",
+          blockType: BlockType.COMMAND,
+          text: ["add blocks", "to script [NAME]"],
+          branchCount: 1,
+          arguments: {
+            NAME: { type: ArgumentType.STRING, defaultValue: "Script1" }
+          },
+        },
+        {
+          opcode: "JGreturn",
+          text: "return [THING]",
+          blockType: BlockType.COMMAND,
+          isTerminal: true,
+          arguments: {
+            THING: { type: ArgumentType.STRING, defaultValue: "1" }
+          },
+        },
+        "---",
+        {
+          opcode: "runBlocks",
+          text: "run script [NAME] in [SPRITE]",
+          blockType: BlockType.LOOP,
+          branchCount: -1,
+          branchIconURI: "",
+          arguments: {
+            NAME: { type: ArgumentType.STRING, defaultValue: "Script1" },
+            SPRITE: { type: ArgumentType.STRING, menu: "TARGETS" }
+          },
+        },
+        {
+          opcode: "reportBlocks",
+          text: "run script [NAME] in [SPRITE]",
+          blockType: BlockType.REPORTER,
+          arguments: {
+            NAME: { type: ArgumentType.STRING, defaultValue: "Script1" },
+            SPRITE: { type: ArgumentType.STRING, menu: "TARGETS" }
+          },
         }
+      ],
+      menus: {
+        TARGETS: { acceptReporters: true, items: "getTargets" }
+      },
+    };
+  }
+
+  getTargets() {
+    const spriteNames = [
+      { text: "myself", value: "_myself_" },
+      { text: "Stage", value: "_stage_" }
+    ];
+    const targets = this.runtime.targets;
+    for (let index = 1; index < targets.length; index++) {
+      const target = targets[index];
+      if (target.isOriginal) spriteNames.push({
+        text: target.getName(),
+        value: target.getName()
+      });
+    }
+    return spriteNames.length > 0 ? spriteNames : [""];
+  }
+
+  createScript(args) {
+    const name = Cast.toString(args.NAME);
+    scripts[name] = { blocks: [] };
+  }
+
+  deleteScript(args) { delete scripts[Cast.toString(args.NAME)] }
+
+  deleteAll() { scripts = {} }
+
+  allScripts() { return JSON.stringify(Object.keys(scripts)) }
+
+  scriptExists(args) { return Cast.toBoolean(scripts[args.NAME]) }
+
+  addBlocksTo(args, util) {
+    const name = Cast.toString(args.NAME);
+    const branch = util.thread.target.blocks.getBranch(util.thread.peekStack(), 1);
+    if (branch && scripts[name] !== undefined && scripts[name].blocks.indexOf(branch) === -1) {
+      scripts[name].blocks.push(branch);
+    }
+  }
+
+  JGreturn(args, util) { util.thread.report = Cast.toString(args.THING) }
+
+  runBlocks(args, util) {
+    const target = args.SPRITE === "_myself_" ? util.target :
+      args.SPRITE === "_stage_" ? this.runtime.getTargetForStage() : this.runtime.getSpriteTargetByName(args.SPRITE);
+    const name = Cast.toString(args.NAME);
+    if (scripts[name] === undefined || !target) return;
+
+    if (util.stackFrame.JGindex === undefined) util.stackFrame.JGindex = 0;
+    if (util.stackFrame.JGthread === undefined) util.stackFrame.JGthread = "";
+    const blocks = scripts[name].blocks;
+    const index = util.stackFrame.JGindex;
+    const thread = util.stackFrame.JGthread;
+    if (!thread && index < blocks.length) {
+      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index], util.target);
+      util.stackFrame.JGthread.target = target;
+      util.stackFrame.JGthread.tryCompile(); // update thread
+      util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
     }
 
-    createScript() {
-        return; // no-op, extension doesn't work fully in interpreter.
+    // same behaviour for util.yield()
+    if (thread && this.runtime.isActiveThread(thread)) util.startBranch(1, true);
+    else util.stackFrame.JGthread = "";
+    if (util.stackFrame.JGindex < blocks.length) util.startBranch(1, true);
+  }
+
+  reportBlocks(args, util) {
+    const target = args.SPRITE === "_myself_" ? util.target :
+      args.SPRITE === "_stage_" ? this.runtime.getTargetForStage() : this.runtime.getSpriteTargetByName(args.SPRITE);
+    const name = Cast.toString(args.NAME);
+    if (scripts[name] === undefined || !target) return;
+
+    if (util.stackFrame.JGindex === undefined) util.stackFrame.JGindex = 0;
+    if (util.stackFrame.JGthread === undefined) util.stackFrame.JGthread = "";
+    const blocks = scripts[name].blocks;
+    const index = util.stackFrame.JGindex;
+    const thread = util.stackFrame.JGthread;
+    if (!thread && index < blocks.length) {
+      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index], util.target);
+      util.stackFrame.JGthread.target = target;
+      util.stackFrame.JGthread.tryCompile(); // update thread
+      util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
     }
-    deleteScript() {
-        return; // no-op, extension doesn't work fully in interpreter.
+
+    if (util.stackFrame.JGthread && this.runtime.isActiveThread(util.stackFrame.JGthread)) util.yield();
+    else {
+      if (util.stackFrame.JGthread.report !== undefined) {
+        util.stackFrame.JGreport = util.stackFrame.JGthread.report;
+        util.stackFrame.JGindex = blocks.length + 1;
+      }
+      util.stackFrame.JGthread = "";
     }
-    scriptExists() {
-        return; // no-op, extension doesn't work fully in interpreter.
-    }
-    addBlocksTo() {
-        return; // no-op, extension doesn't work fully in interpreter.
-    }
+    if (util.stackFrame.JGindex < blocks.length) util.yield();
+    return util.stackFrame.JGreport || "";
+  }
 }
 
 module.exports = JgScriptsBlocks;
