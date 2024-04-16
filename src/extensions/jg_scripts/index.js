@@ -126,22 +126,22 @@ class JgScriptsBlocks {
 
   createScript(args) {
     const name = Cast.toString(args.NAME);
-    scripts[name] = { blocks: [] };
+    this.scripts[name] = { blocks: [] };
   }
 
-  deleteScript(args) { delete scripts[Cast.toString(args.NAME)] }
+  deleteScript(args) { delete this.scripts[Cast.toString(args.NAME)] }
 
-  deleteAll() { scripts = {} }
+  deleteAll() { this.scripts = {} }
 
-  allScripts() { return JSON.stringify(Object.keys(scripts)) }
+  allScripts() { return JSON.stringify(Object.keys(this.scripts)) }
 
-  scriptExists(args) { return Cast.toBoolean(scripts[args.NAME]) }
+  scriptExists(args) { return Cast.toBoolean(this.scripts[args.NAME]) }
 
   addBlocksTo(args, util) {
     const name = Cast.toString(args.NAME);
     const branch = util.thread.target.blocks.getBranch(util.thread.peekStack(), 1);
-    if (branch && scripts[name] !== undefined && scripts[name].blocks.indexOf(branch) === -1) {
-      scripts[name].blocks.push(branch);
+    if (branch && this.scripts[name] !== undefined /*&& this.scripts[name].blocks.indexOf(branch) === -1*/) { // Remove the feature to check for the same existing block, its dumb
+      this.scripts[name].blocks.push(branch);
     }
   }
 
@@ -151,11 +151,11 @@ class JgScriptsBlocks {
     const target = args.SPRITE === "_myself_" ? util.target :
       args.SPRITE === "_stage_" ? this.runtime.getTargetForStage() : this.runtime.getSpriteTargetByName(args.SPRITE);
     const name = Cast.toString(args.NAME);
-    if (scripts[name] === undefined || !target) return;
+    if (this.scripts[name] === undefined || !target) return;
 
     if (util.stackFrame.JGindex === undefined) util.stackFrame.JGindex = 0;
     if (util.stackFrame.JGthread === undefined) util.stackFrame.JGthread = "";
-    const blocks = scripts[name].blocks;
+    const blocks = this.scripts[name].blocks;
     const index = util.stackFrame.JGindex;
     const thread = util.stackFrame.JGthread;
     if (!thread && index < blocks.length) {
@@ -175,11 +175,11 @@ class JgScriptsBlocks {
     const target = args.SPRITE === "_myself_" ? util.target :
       args.SPRITE === "_stage_" ? this.runtime.getTargetForStage() : this.runtime.getSpriteTargetByName(args.SPRITE);
     const name = Cast.toString(args.NAME);
-    if (scripts[name] === undefined || !target) return;
+    if (this.scripts[name] === undefined || !target) return;
 
     if (util.stackFrame.JGindex === undefined) util.stackFrame.JGindex = 0;
     if (util.stackFrame.JGthread === undefined) util.stackFrame.JGthread = "";
-    const blocks = scripts[name].blocks;
+    const blocks = this.scripts[name].blocks;
     const index = util.stackFrame.JGindex;
     const thread = util.stackFrame.JGthread;
     if (!thread && index < blocks.length) {
