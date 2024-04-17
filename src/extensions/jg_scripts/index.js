@@ -85,7 +85,7 @@ class JgScriptsBlocks {
         {
           opcode: "scriptData",
           text: "script data",
-          blockType: BlockType.COMMAND,
+          blockType: BlockType.REPORTER,
           allowDropAnywhere: true,
           disableMonitor: true
         },
