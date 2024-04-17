@@ -113,6 +113,7 @@ class JgScriptsBlocks {
             DATA: { type: ArgumentType.STRING, defaultValue: "data" }
           },
         },
+        "---",
         {
           opcode: "reportBlocks",
           text: "run script [NAME] in [SPRITE]",
@@ -208,7 +209,7 @@ class JgScriptsBlocks {
     if (util.stackFrame.JGindex < blocks.length) util.startBranch(1, true);
   }
 
-  reportBlocksData(args, util) { this.reportBlocks(args, util) }
+  reportBlocksData(args, util) { return this.reportBlocks(args, util) || "" }
   reportBlocks(args, util) {
     const target = args.SPRITE === "_myself_" ? util.target :
       args.SPRITE === "_stage_" ? this.runtime.getTargetForStage() : this.runtime.getSpriteTargetByName(args.SPRITE);
