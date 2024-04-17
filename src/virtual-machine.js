@@ -243,7 +243,9 @@ class VirtualMachine extends EventEmitter {
             JSZip,
             JSGenerator,
             IRGenerator,
-            jsexecute
+            jsexecute,
+            loadCostume,
+            loadSound
         };
     }
 
