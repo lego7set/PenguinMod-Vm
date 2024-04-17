@@ -170,8 +170,8 @@ class JgScriptsBlocks {
   addBlocksTo(args, util) {
     const name = Cast.toString(args.NAME);
     const branch = util.thread.target.blocks.getBranch(util.thread.peekStack(), 1);
-    if (branch && this.scripts[name] !== undefined /*&& this.scripts[name].blocks.indexOf(branch) === -1*/) { // Remove the feature to check for the same existing block, its dumb
-      this.scripts[name].blocks.push(branch);
+    if (branch && this.scripts[name] !== undefined) {
+      this.scripts[name].blocks.push({ stack : branch, target : util.target });
     }
   }
 
@@ -196,7 +196,7 @@ class JgScriptsBlocks {
     const index = util.stackFrame.JGindex;
     const thread = util.stackFrame.JGthread;
     if (!thread && index < blocks.length) {
-      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index], util.target);
+      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index].stack, blocks[index].target, { stackClick: false });
       util.stackFrame.JGthread.scriptData = data;
       util.stackFrame.JGthread.target = target;
       util.stackFrame.JGthread.tryCompile(); // update thread
@@ -223,7 +223,7 @@ class JgScriptsBlocks {
     const index = util.stackFrame.JGindex;
     const thread = util.stackFrame.JGthread;
     if (!thread && index < blocks.length) {
-      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index], util.target, { stackClick: false });
+      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index].stack, blocks[index].target, { stackClick: false });
       util.stackFrame.JGthread.scriptData = data;
       util.stackFrame.JGthread.target = target;
       util.stackFrame.JGthread.tryCompile(); // update thread
