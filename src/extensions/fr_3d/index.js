@@ -19,6 +19,7 @@ class Fr3DBlocks {
         this.world = {}
         this._3d = {}
         this.Three = {}
+        this.CANNON = CANNON
         if (!vm.runtime.ext_jg3d) {
             vm.extensionManager.loadExtensionURL('jg3d')
                 .then(() => {
@@ -75,10 +76,10 @@ class Fr3DBlocks {
             indices.push(i);
             }
 
-            return new CANNON.Trimesh(vertices, indices);
+            return new this.CANNON.Trimesh(vertices, indices);
         } else if (geometry instanceof this.Three.Geometry) {
-            return new CANNON.ConvexPolyhedron(
-            geometry.vertices.map((v) => new CANNON.Vec3(v.x, v.y, v.z)),
+            return new this.CANNON.ConvexPolyhedron(
+            geometry.vertices.map((v) => new this.CANNON.Vec3(v.x, v.y, v.z)),
             geometry.faces.map((f) => [f.a, f.b, f.c]),
             );
         } else {
@@ -99,7 +100,7 @@ class Fr3DBlocks {
             return;
         }
 
-        const body = new CANNON.Body({
+        const body = new this.CANNON.Body({
             mass: 1,
         });
 
