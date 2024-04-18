@@ -160,6 +160,10 @@ class SecurityManager {
     canUnsandbox() {
         return Promise.resolve(false);
     }
+
+    shouldUseLocal(refrenceName) {
+        return Promise.resolve(!confirm(`it seems that the extension ${refrenceName} has been updated, use the up-to-date code?`))
+    }
 }
 
 module.exports = SecurityManager;
