@@ -12,25 +12,28 @@ const Icon = require('./icon.png');
  */
 class Fr3DBlocks {
     constructor(runtime) {
-        /**
-         * The runtime instantiating this block package.
-         */
-        this.runtime = runtime;
-        this.world = {}
-        this._3d = {}
-        this.Three = {}
-        this.CANNON = CANNON
-        if (!vm.runtime.ext_jg3d) {
-            vm.extensionManager.loadExtensionURL('jg3d')
-                .then(() => {
-                    this._3d = vm.runtime.ext_jg3d;
-                    this.Three = this._3d.three;
-                })
-        } else {
-            this._3d = vm.runtime.ext_jg3d;
-            this.Three = this._3d.three
-        }
+    /**
+     * The runtime instantiating this block package.
+     */
+    this.runtime = runtime;
+
+    // Create the Cannon.js world before initializing other properties
+    this.world = new CANNON.World();
+
+    this._3d = {};
+    this.Three = {};
+
+    if (!vm.runtime.ext_jg3d) {
+      vm.extensionManager.loadExtensionURL('jg3d')
+        .then(() => {
+          this._3d = vm.runtime.ext_jg3d;
+          this.Three = this._3d.three;
+        })
+    } else {
+      this._3d = vm.runtime.ext_jg3d;
+      this.Three = this._3d.three;
     }
+  }
     /**
      * metadata for this extension and its blocks.
      * @returns {object}
@@ -53,7 +56,7 @@ class Fr3DBlocks {
                     text: 'enable physics for [NAME1]',
                     blockType: BlockType.COMMAND,
                     arguments: {
-                        NAME1: { type: ArgumentType.STRING, defaultValue: "Cube1" }
+                        NAME1: { type: ArgumentType.STRING, defaultValue: "Object1" }
                     }
                 },
                 {
@@ -61,7 +64,7 @@ class Fr3DBlocks {
                     text: 'disable physics for [NAME1]',
                     blockType: BlockType.COMMAND,
                     arguments: {
-                        NAME1: { type: ArgumentType.STRING, defaultValue: "Plane1" }
+                        NAME1: { type: ArgumentType.STRING, defaultValue: "Object1" }
                     }
                 }
             ]
@@ -88,40 +91,47 @@ class Fr3DBlocks {
         }
     }
 
-    enablePhysicsForObject(object) {
-        if (!this._3d.scene) return;
-        var object = this._3d.scene.getObjectByName(object)
-        if (!object || !this._3d.scene) return;
+    enablePhysicsForObject(objectName) {
+    if (!this._3d.scene) return;
+    const object = this._3d.scene.getObjectByName(objectName);
+    if (!object || !this._3d.scene) return;
 
-        const shape = this.createShapeFromGeometry(object.geometry);
+    const shape = this.createShapeFromGeometry(object.geometry);
 
-        if (!shape) {
-            console.warn('Failed to create a valid shape for the object:', object.name);
-            return;
-        }
-
-        const body = new this.CANNON.Body({
-            mass: 1,
-        });
-
-        body.addShape(shape);
-
-        object.userData.physicsBody = body;
-        }
-    disablePhysicsForObject(object) {
-        var object = this._3d.scene.getObjectByName(object)
-        if (!object || !object.userData || !object.userData.physicsBody) return;
-
-        delete object.userData.physicsBody;
+    if (!shape) {
+      console.warn('Failed to create a valid shape for the object:', object.name);
+      return;
     }
+
+    const body = new CANNON.Body({
+      mass: 1, // You might want to adjust mass based on object size/type
+    });
+
+    body.addShape(shape);
+    this.world.addBody(body); // Add the body to the Cannon.js world
+
+    object.userData.physicsBody = body;
+  }
+
+  disablePhysicsForObject(objectName) {
+    const object = this._3d.scene.getObjectByName(objectName);
+    if (!object || !object.userData || !object.userData.physicsBody) return;
+
+    this.world.removeBody(object.userData.physicsBody); // Remove from world
+    delete object.userData.physicsBody;
+  }
     step() {
-        this._3d.scene.traverse((object) => {
-            if (object.userData.physicsBody) {
-            object.position.copy(object.userData.physicsBody.position);
-            object.quaternion.copy(object.userData.physicsBody.quaternion);
-            }
-        });
-    }
+    // Step the Cannon.js world to simulate physics
+    this.world.step(1/60); // Update at 60 fps (adjust timestep as needed)
+
+    // Update Three.js object positions and rotations from physics bodies
+    this._3d.scene.traverse((object) => {
+      if (object.userData && object.userData.physicsBody) {
+        object.position.copy(object.userData.physicsBody.position);
+        object.quaternion.copy(object.userData.physicsBody.quaternion);
+      }
+    });
+  }
     addp(args) {
         this.enablePhysicsForObject(Cast.toString(args.NAME1))
     }
