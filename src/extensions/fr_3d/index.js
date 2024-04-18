@@ -16,9 +16,9 @@ class Fr3DBlocks {
      * The runtime instantiating this block package.
      */
     this.runtime = runtime;
-
+    this.CANNON = CANNON
     // Create the Cannon.js world before initializing other properties
-    this.world = new CANNON.World();
+    this.world = new this.CANNON.World();
 
     this._3d = {};
     this.Three = {};
@@ -79,10 +79,10 @@ class Fr3DBlocks {
             indices.push(i);
             }
 
-            return new this.CANNON.Trimesh(vertices, indices);
+            return new this.this.CANNON.Trimesh(vertices, indices);
         } else if (geometry instanceof this.Three.Geometry) {
-            return new this.CANNON.ConvexPolyhedron(
-            geometry.vertices.map((v) => new this.CANNON.Vec3(v.x, v.y, v.z)),
+            return new this.this.CANNON.ConvexPolyhedron(
+            geometry.vertices.map((v) => new this.this.CANNON.Vec3(v.x, v.y, v.z)),
             geometry.faces.map((f) => [f.a, f.b, f.c]),
             );
         } else {
@@ -103,7 +103,7 @@ class Fr3DBlocks {
       return;
     }
 
-    const body = new CANNON.Body({
+    const body = new this.CANNON.Body({
       mass: 1, // You might want to adjust mass based on object size/type
     });
 
