@@ -1258,7 +1258,11 @@ class Runtime extends EventEmitter {
             categoryInfo.orderBlocks = extensionInfo.orderBlocks;
         }
 
-        categoryInfo.tbShow = extensionInfo.tbShow || false
+        categoryInfo.tbShow = extensionInfo.tbShow || false;
+
+        if (extensionInfo.customInfo) {
+            categoryInfo.customInfo = extensionInfo.customInfo;
+        }
 
         this._blockInfo.push(categoryInfo);
 
@@ -1275,7 +1279,7 @@ class Runtime extends EventEmitter {
                 });
             }
         }
-
+        
         this.emit(Runtime.EXTENSION_ADDED, categoryInfo);
     }
 
