@@ -126,6 +126,8 @@ const defaultBuiltinExtensions = {
     // jgChristmas: Christmas extension used for making Christmas extensions
     jgChristmas: () => require("../extensions/jg_christmas"),
 
+    jgScripts: () => require("../extensions/jg_scripts"),
+
     // jw: hello it is i jwklong
     // jwUnite: literal features that should of been added in the first place
     jwUnite: () => require("../extensions/jw_unite"),
