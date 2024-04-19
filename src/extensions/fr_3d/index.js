@@ -79,10 +79,10 @@ class Fr3DBlocks {
             indices.push(i);
             }
 
-            return new this.this.CANNON.Trimesh(vertices, indices);
+            return new this.CANNON.Trimesh(vertices, indices);
         } else if (geometry instanceof this.Three.Geometry) {
-            return new this.this.CANNON.ConvexPolyhedron(
-            geometry.vertices.map((v) => new this.this.CANNON.Vec3(v.x, v.y, v.z)),
+            return new this.CANNON.ConvexPolyhedron(
+            geometry.vertices.map((v) => new this.CANNON.Vec3(v.x, v.y, v.z)),
             geometry.faces.map((f) => [f.a, f.b, f.c]),
             );
         } else {
