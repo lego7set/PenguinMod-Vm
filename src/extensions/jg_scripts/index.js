@@ -27,7 +27,8 @@ class JgScriptsBlocks {
       name: "Scripts",
       color1: "#8c8c8c",
       color2: "#7a7a7a",
-      blocks: [{
+      blocks: [
+        {
           opcode: "createScript",
           blockType: BlockType.COMMAND,
           text: "create script named [NAME]",
@@ -82,6 +83,14 @@ class JgScriptsBlocks {
         },
         "---",
         {
+          opcode: "scriptData",
+          text: "script data",
+          blockType: BlockType.REPORTER,
+          allowDropAnywhere: true,
+          disableMonitor: true
+        },
+        "---",
+        {
           opcode: "runBlocks",
           text: "run script [NAME] in [SPRITE]",
           blockType: BlockType.LOOP,
@@ -93,12 +102,37 @@ class JgScriptsBlocks {
           },
         },
         {
+          opcode: "runBlocksData",
+          text: "run script [NAME] in [SPRITE] with data [DATA]",
+          blockType: BlockType.LOOP,
+          branchCount: -1,
+          branchIconURI: "",
+          arguments: {
+            NAME: { type: ArgumentType.STRING, defaultValue: "Script1" },
+            SPRITE: { type: ArgumentType.STRING, menu: "TARGETS" },
+            DATA: { type: ArgumentType.STRING, defaultValue: "data" }
+          },
+        },
+        "---",
+        {
           opcode: "reportBlocks",
           text: "run script [NAME] in [SPRITE]",
           blockType: BlockType.REPORTER,
+          allowDropAnywhere: true,
           arguments: {
             NAME: { type: ArgumentType.STRING, defaultValue: "Script1" },
             SPRITE: { type: ArgumentType.STRING, menu: "TARGETS" }
+          },
+        },
+        {
+          opcode: "reportBlocksData",
+          text: "run script [NAME] in [SPRITE] with data [DATA]",
+          blockType: BlockType.REPORTER,
+          allowDropAnywhere: true,
+          arguments: {
+            NAME: { type: ArgumentType.STRING, defaultValue: "Script1" },
+            SPRITE: { type: ArgumentType.STRING, menu: "TARGETS" },
+            DATA: { type: ArgumentType.STRING, defaultValue: "data" }
           },
         }
       ],
@@ -117,17 +151,13 @@ class JgScriptsBlocks {
     for (let index = 1; index < targets.length; index++) {
       const target = targets[index];
       if (target.isOriginal) spriteNames.push({
-        text: target.getName(),
-        value: target.getName()
+        text: target.getName(), value: target.getName()
       });
     }
     return spriteNames.length > 0 ? spriteNames : [""];
   }
 
-  createScript(args) {
-    const name = Cast.toString(args.NAME);
-    this.scripts[name] = { blocks: [] };
-  }
+  createScript(args) { this.scripts[Cast.toString(args.NAME)] = { blocks: [] } }
 
   deleteScript(args) { delete this.scripts[Cast.toString(args.NAME)] }
 
@@ -140,17 +170,24 @@ class JgScriptsBlocks {
   addBlocksTo(args, util) {
     const name = Cast.toString(args.NAME);
     const branch = util.thread.target.blocks.getBranch(util.thread.peekStack(), 1);
-    if (branch && this.scripts[name] !== undefined /*&& this.scripts[name].blocks.indexOf(branch) === -1*/) { // Remove the feature to check for the same existing block, its dumb
-      this.scripts[name].blocks.push(branch);
+    if (branch && this.scripts[name] !== undefined) {
+      this.scripts[name].blocks.push({ stack : branch, target : util.target });
     }
   }
 
   JGreturn(args, util) { util.thread.report = Cast.toString(args.THING) }
 
+  scriptData(args, util) {
+    const data = util.thread.scriptData;
+    return data ? data : "";
+  }
+
+  runBlocksData(args, util) { this.runBlocks(args, util) }
   runBlocks(args, util) {
     const target = args.SPRITE === "_myself_" ? util.target :
       args.SPRITE === "_stage_" ? this.runtime.getTargetForStage() : this.runtime.getSpriteTargetByName(args.SPRITE);
     const name = Cast.toString(args.NAME);
+    const data = args.DATA ? Cast.toString(args.DATA) : "";
     if (this.scripts[name] === undefined || !target) return;
 
     if (util.stackFrame.JGindex === undefined) util.stackFrame.JGindex = 0;
@@ -159,7 +196,8 @@ class JgScriptsBlocks {
     const index = util.stackFrame.JGindex;
     const thread = util.stackFrame.JGthread;
     if (!thread && index < blocks.length) {
-      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index], util.target);
+      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index].stack, blocks[index].target, { stackClick: false });
+      util.stackFrame.JGthread.scriptData = data;
       util.stackFrame.JGthread.target = target;
       util.stackFrame.JGthread.tryCompile(); // update thread
       util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
@@ -171,10 +209,12 @@ class JgScriptsBlocks {
     if (util.stackFrame.JGindex < blocks.length) util.startBranch(1, true);
   }
 
+  reportBlocksData(args, util) { return this.reportBlocks(args, util) || "" }
   reportBlocks(args, util) {
     const target = args.SPRITE === "_myself_" ? util.target :
       args.SPRITE === "_stage_" ? this.runtime.getTargetForStage() : this.runtime.getSpriteTargetByName(args.SPRITE);
     const name = Cast.toString(args.NAME);
+    const data = args.DATA ? Cast.toString(args.DATA) : "";
     if (this.scripts[name] === undefined || !target) return;
 
     if (util.stackFrame.JGindex === undefined) util.stackFrame.JGindex = 0;
@@ -183,7 +223,8 @@ class JgScriptsBlocks {
     const index = util.stackFrame.JGindex;
     const thread = util.stackFrame.JGthread;
     if (!thread && index < blocks.length) {
-      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index], util.target);
+      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index].stack, blocks[index].target, { stackClick: false });
+      util.stackFrame.JGthread.scriptData = data;
       util.stackFrame.JGthread.target = target;
       util.stackFrame.JGthread.tryCompile(); // update thread
       util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
