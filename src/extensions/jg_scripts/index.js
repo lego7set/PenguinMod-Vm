@@ -93,7 +93,9 @@ class JgScriptsBlocks {
         {
           opcode: "runBlocks",
           text: "run script [NAME] in [SPRITE]",
-          blockType: BlockType.COMMAND,
+          blockType: BlockType.LOOP,
+          branchCount: -1,
+          branchIconURI: "",
           arguments: {
             NAME: { type: ArgumentType.STRING, defaultValue: "Script1" },
             SPRITE: { type: ArgumentType.STRING, menu: "TARGETS" }
@@ -102,7 +104,9 @@ class JgScriptsBlocks {
         {
           opcode: "runBlocksData",
           text: "run script [NAME] in [SPRITE] with data [DATA]",
-          blockType: BlockType.COMMAND,
+          blockType: BlockType.LOOP,
+          branchCount: -1,
+          branchIconURI: "",
           arguments: {
             NAME: { type: ArgumentType.STRING, defaultValue: "Script1" },
             SPRITE: { type: ArgumentType.STRING, menu: "TARGETS" },
@@ -202,9 +206,9 @@ class JgScriptsBlocks {
       util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
     }
 
-    if (thread && this.runtime.isActiveThread(thread)) util.yield();
+    if (thread && this.runtime.isActiveThread(thread)) util.startBranch(1, true);
     else util.stackFrame.JGthread = "";
-    if (util.stackFrame.JGindex < blocks.length) util.yield();
+    if (util.stackFrame.JGindex < blocks.length) util.startBranch(1, true);
   }
 
   reportBlocksData(args, util) { return this.reportBlocks(args, util) || "" }
