@@ -196,14 +196,16 @@ class JgScriptsBlocks {
     const index = util.stackFrame.JGindex;
     const thread = util.stackFrame.JGthread;
     if (!thread && index < blocks.length) {
-      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index].stack, blocks[index].target, { stackClick: false });
-      util.stackFrame.JGthread.scriptData = data;
-      util.stackFrame.JGthread.target = target;
-      util.stackFrame.JGthread.tryCompile(); // update thread
+      const thisStack = blocks[index];
+      if (thisStack.target.blocks.getBlock(thisStack.stack) !== undefined) {
+        util.stackFrame.JGthread = this.runtime._pushThread(thisStack.stack, thisStack.target, { stackClick: false });
+        util.stackFrame.JGthread.scriptData = data;
+        util.stackFrame.JGthread.target = target;
+        util.stackFrame.JGthread.tryCompile(); // update thread
+      }
       util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
     }
 
-    // same behaviour for util.yield()
     if (thread && this.runtime.isActiveThread(thread)) util.startBranch(1, true);
     else util.stackFrame.JGthread = "";
     if (util.stackFrame.JGindex < blocks.length) util.startBranch(1, true);
@@ -223,10 +225,13 @@ class JgScriptsBlocks {
     const index = util.stackFrame.JGindex;
     const thread = util.stackFrame.JGthread;
     if (!thread && index < blocks.length) {
-      util.stackFrame.JGthread = this.runtime._pushThread(blocks[index].stack, blocks[index].target, { stackClick: false });
-      util.stackFrame.JGthread.scriptData = data;
-      util.stackFrame.JGthread.target = target;
-      util.stackFrame.JGthread.tryCompile(); // update thread
+      const thisStack = blocks[index];
+      if (thisStack.target.blocks.getBlock(thisStack.stack) !== undefined) {
+        util.stackFrame.JGthread = this.runtime._pushThread(thisStack.stack, thisStack.target, { stackClick: false });
+        util.stackFrame.JGthread.scriptData = data;
+        util.stackFrame.JGthread.target = target;
+        util.stackFrame.JGthread.tryCompile(); // update thread
+      }
       util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
     }
 

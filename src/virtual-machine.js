@@ -17,6 +17,7 @@ const Runtime = require('./engine/runtime');
 const StringUtil = require('./util/string-util');
 const RenderedTarget = require('./sprites/rendered-target');
 const Sprite = require('./sprites/sprite');
+const Blocks = require('./engine/blocks');
 const formatMessage = require('format-message');
 
 const Variable = require('./engine/variable');
@@ -243,7 +244,10 @@ class VirtualMachine extends EventEmitter {
             JSZip,
             JSGenerator,
             IRGenerator,
-            jsexecute
+            jsexecute,
+            loadCostume,
+            loadSound,
+            Blocks
         };
     }
 
