@@ -198,8 +198,8 @@ class JgScriptsBlocks {
         util.stackFrame.JGthread.scriptData = data;
         util.stackFrame.JGthread.target = target;
         util.stackFrame.JGthread.tryCompile(); // update thread
-        util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
       }
+      util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
     }
 
     if (thread && this.runtime.isActiveThread(thread)) util.yield();
@@ -227,8 +227,8 @@ class JgScriptsBlocks {
         util.stackFrame.JGthread.scriptData = data;
         util.stackFrame.JGthread.target = target;
         util.stackFrame.JGthread.tryCompile(); // update thread
-        util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
       }
+      util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
     }
 
     if (util.stackFrame.JGthread && this.runtime.isActiveThread(util.stackFrame.JGthread)) util.yield();
