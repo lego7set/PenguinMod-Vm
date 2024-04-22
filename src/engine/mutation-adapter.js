@@ -4,6 +4,7 @@
  * @return {object} Object representing useful parts of this mutation.
  */
 const mutatorTagToObject = function (dom) {
+    if (dom.tagName === '#text') return dom.textContent
     const parseChildren = (obj, dom) => {
         for (let i = 0; i < dom.children.length; i++) {
             obj.children.push(
