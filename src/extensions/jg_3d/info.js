@@ -359,6 +359,9 @@ module.exports = {
             VECTOR3: infoArgumentMenu(ArgumentType.STRING, "vector3"),
             NAME: infoArgument("Object1"),
         }),
+        createReporterBlock("getObjectColor", "hex color of object named [NAME]", {
+            NAME: infoArgument("Object1"),
+        }),
         seperator,
         createBooleanBlock("objectTouchingObject", "object [NAME1] touching object [NAME2]?", {
             NAME1: infoArgument("Object1"),
