@@ -11,12 +11,17 @@ const setupInitialState = runtime => {
         const directionAndScale = target._getRenderedDirectionAndScale();
         let camData = { ...runtime.getCamera(target.cameraBound) };
         camData.dir = camData.dir / 180;
+        camData.scale = 1 + ((camData.scale - 1) / 100);
 
         // If sprite may have been interpolated in the previous frame, reset its renderer state.
         if (renderer && target.interpolationData) {
             const drawableID = target.drawableID;
             renderer.updateDrawablePosition(drawableID, [target.x - camData.pos[0], target.y - camData.pos[1]]);
-            renderer.updateDrawableDirectionScale(drawableID, directionAndScale.direction - camData.dir, [directionAndScale.scale[0] * camData.scale, directionAndScale.scale[1] * camData.scale]);
+            renderer.updateDrawableDirectionScale(
+                drawableID, 
+                directionAndScale.direction - camData.dir,
+                [directionAndScale.scale[0] * camData.scale, directionAndScale.scale[1] * camData.scale]
+            );
             renderer.updateDrawableEffect(drawableID, 'ghost', target.effects.ghost);
         }
 
@@ -59,7 +64,8 @@ const interpolate = (runtime, time) => {
             continue;
         }
 
-        const camData = runtime.getCamera(target.cameraBound);
+        let camData = { ...runtime.getCamera(target.cameraBound) };
+        camData.scale = 1 + ((camData.scale - 1) / 100);
         const drawableID = target.drawableID;
 
         // Position interpolation.
@@ -114,6 +120,8 @@ const interpolate = (runtime, time) => {
 
             // Interpolate scale.
             const startingScale = interpolationData.scale;
+            scale[0] = scale[0] * camData.scale;
+            scale[1] = scale[1] * camData.scale;
             if (scale[0] !== startingScale[0] || scale[1] !== startingScale[1]) {
                 // Do not interpolate size when the sign of either scale differs.
                 if (
@@ -126,8 +134,8 @@ const interpolate = (runtime, time) => {
                     const absoluteChangeY = Math.abs(changeY);
                     // Large changes are likely intended to be instantaneous.
                     if (absoluteChangeX < 100 && absoluteChangeY < 100) {
-                        scale[0] = startingScale[0] + (changeX * time);
-                        scale[1] = startingScale[1] + (changeY * time);
+                        scale[0] = (startingScale[0] + (changeX * time));
+                        scale[1] = (startingScale[1] + (changeY * time));
                         updateDrawableDirectionScale = true;
                     }
                 }
