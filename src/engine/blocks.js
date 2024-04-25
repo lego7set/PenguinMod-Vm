@@ -1277,6 +1277,7 @@ class Blocks {
      * @return {string} XML string representing a mutation.
      */
     mutationToXML (mutation) {
+        if (typeof mutation === 'string') return xmlEscape(mutation)
         let mutationString = `<${mutation.tagName}`;
         for (const prop in mutation) {
             if (prop === 'children' || prop === 'tagName') continue;

@@ -872,6 +872,13 @@ const serialize = function (runtime, targetId, {allowOptimization = true} = {}) 
     meta.agent = '';
     // TW: Never include full user agent to slightly improve user privacy
     // if (typeof navigator !== 'undefined') meta.agent = navigator.userAgent;
+    
+    // Attach platform information so TurboWarp and other mods can detect where the file comes from
+    const platform = Object.create(null);
+    platform.name = "PenguinMod";
+    platform.url = "https://penguinmod.com/";
+    platform.version = "stable";
+    meta.platform = platform;
 
     // Assemble payload and return
     obj.meta = meta;
