@@ -115,7 +115,7 @@ const waitPromise = function*(promise) {
             thread.status = 0; // STATUS_RUNNING
         })
         .catch(error => {
-            errorReturn = error
+            errorReturn = error;
             // i realized, i dont actually know what would happen if we never do this but throw and exit anyways
             thresd.status = 0; // STATUS_RUNNING
         });
