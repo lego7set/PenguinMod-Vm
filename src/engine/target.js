@@ -167,14 +167,14 @@ class Target extends EventEmitter {
      * @param {string} name Name of the variable.
      * @return {?Variable} Variable object.
      */
-    lookupBroadcastByInputValue (name) {
-        const vars = this.variables;
-        for (const propName in vars) {
-            if ((vars[propName].type === Variable.BROADCAST_MESSAGE_TYPE) &&
-                (vars[propName].name.toLowerCase() === name.toLowerCase())) {
-                return vars[propName];
-            }
-        }
+    lookupBroadcastByInputValue(name) {
+        const variables = Object.values(this.variables);
+        return variables.find(varData => {
+            return (
+                varData.type === Variable.BROADCAST_MESSAGE_TYPE &&
+                varData.name.toLowerCase() === name.toLowerCase()
+            );
+        });
     }
 
     /**
@@ -228,33 +228,6 @@ class Target extends EventEmitter {
         }
         return null;
     }
-
-    /*lookupVariableByNameAndType (name, type, skipStage) {
-        if (typeof name !== 'string') return;
-        if (typeof type !== 'string') type = Variable.SCALAR_TYPE;
-        skipStage = skipStage || false;
-
-        for (const varId in this.variables) {
-            const currVar = this.variables[varId];
-            if (currVar.name === name && currVar.type === type) {
-                return currVar;
-            }
-        }
-
-        if (!skipStage && this.runtime && !this.isStage) {
-            const stage = this.runtime.getTargetForStage();
-            if (stage) {
-                for (const varId in stage.variables) {
-                    const currVar = stage.variables[varId];
-                    if (currVar.name === name && currVar.type === type) {
-                        return currVar;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }*/
 
     /**
     * Look up a list object for this target, and create it if one doesn't exist.
