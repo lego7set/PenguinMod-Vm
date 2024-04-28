@@ -583,7 +583,7 @@ class Runtime extends EventEmitter {
         };
 
         // it back
-        this.on('RUNTIME_STEP_START', () => this.emit('BEFORE_EXECUTE'));
+//        this.on('RUNTIME_STEP_START', () => this.emit('BEFORE_EXECUTE'));
 
         // list of variable types declared by extensions
         this._extensionVariables = {};
