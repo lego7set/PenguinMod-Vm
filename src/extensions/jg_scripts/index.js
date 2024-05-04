@@ -206,7 +206,7 @@ class JgScriptsBlocks {
       util.stackFrame.JGindex = util.stackFrame.JGindex + 1;
     }
 
-    if (thread && this.runtime.isActiveThread(thread)) util.startBranch(1, true);
+    if (util.stackFrame.JGthread && this.runtime.isActiveThread(util.stackFrame.JGthread)) util.startBranch(1, true);
     else util.stackFrame.JGthread = "";
     if (util.stackFrame.JGindex < blocks.length) util.startBranch(1, true);
   }
