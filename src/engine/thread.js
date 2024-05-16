@@ -531,4 +531,7 @@ class Thread {
     }
 }
 
+// For extensions
+Thread._StackFrame = _StackFrame;
+
 module.exports = Thread;
