@@ -1805,6 +1805,7 @@ class ScriptTreeGenerator {
                 kind: 'tempVars.deleteAll'
             };
         case 'tempVars_forEachTempVar':
+            this.script.yields = true;
             return {
                 kind: 'tempVars.forEach',
                 var: this.descendInputOfBlock(block, 'NAME'),
