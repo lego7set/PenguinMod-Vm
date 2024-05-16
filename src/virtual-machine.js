@@ -249,7 +249,9 @@ class VirtualMachine extends EventEmitter {
             loadCostume,
             loadSound,
             Blocks,
-            StageLayering
+            StageLayering,
+            Thread: require('./engine/thread.js'),
+            execute: require('./engine/execute.js')
         };
     }
 
