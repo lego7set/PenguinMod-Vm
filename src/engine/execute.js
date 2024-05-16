@@ -562,6 +562,9 @@ const execute = function (sequencer, thread) {
                     parentValues[inputName] = primitiveReportedValue;
                 }
             }
+        } else if (thread.status === Thread.STATUS_DONE) {
+            // Nothing else to execute.
+            break;
         }
     }
 
