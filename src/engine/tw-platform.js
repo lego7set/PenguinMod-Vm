@@ -2,6 +2,6 @@
 // This can be accessed externally on `vm.runtime.platform`
 
 module.exports = {
-    name: 'TurboWarp',
-    url: 'https://turbowarp.org/'
+    name: 'AcidMod',
+    url: 'https://acidmod.github.io/studio/'
 };
