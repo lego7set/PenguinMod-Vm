@@ -344,6 +344,12 @@ class ScriptTreeGenerator {
                 left: this.descendInputOfBlock(block, 'OPERAND1'),
                 right: this.descendInputOfBlock(block, 'OPERAND2')
             };
+        case 'operator_threquals':
+            return {
+                kind: 'op.threquals',
+                left: this.descendInputOfBlock(block, 'OPERAND1'),
+                right: this.descendInputOfBlock(block, 'OPERAND2')
+            };
         case 'operator_gt':
             return {
                 kind: 'op.greater',
