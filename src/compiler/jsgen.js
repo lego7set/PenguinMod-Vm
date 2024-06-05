@@ -550,25 +550,8 @@ class JSGenerator {
         case 'op.threquals': {
             const left = this.descendInput(node.left);
             const right = this.descendInput(node.right);
-            // When both operands are known to never be numbers, only use string comparison to avoid all number parsing.
-            if (left.isNeverNumber() || right.isNeverNumber()) {
-                return new TypedInput(`(${left.asString()}.toLowerCase() === ${right.asString()}.toLowerCase())`, TYPE_BOOLEAN);
-            }
-            const leftAlwaysNumber = left.isAlwaysNumber();
-            const rightAlwaysNumber = right.isAlwaysNumber();
-            // When both operands are known to be numbers, we can use ===
-            if (leftAlwaysNumber && rightAlwaysNumber) {
-                return new TypedInput(`(${left.asNumber()} === ${right.asNumber()})`, TYPE_BOOLEAN);
-            }
-            // In certain conditions, we can use === when one of the operands is known to be a safe number.
-            if (leftAlwaysNumber && left instanceof ConstantInput && isSafeConstantForEqualsOptimization(left)) {
-                return new TypedInput(`(${left.asNumber()} === ${right.asNumber()})`, TYPE_BOOLEAN);
-            }
-            if (rightAlwaysNumber && right instanceof ConstantInput && isSafeConstantForEqualsOptimization(right)) {
-                return new TypedInput(`(${left.asNumber()} === ${right.asNumber()})`, TYPE_BOOLEAN);
-            }
-            // No compile-time optimizations possible - use fallback method.
-            return new TypedInput(`compareEqual(${left.asUnknown()}, ${right.asUnknown()})`, TYPE_BOOLEAN);
+
+            return new TypedInput(`(${left.asUnknown()}===${right.asUnknown()})`, TYPE_BOOLEAN);
         }
         case 'op.e^':
             return new TypedInput(`Math.exp(${this.descendInput(node.value).asNumber()})`, TYPE_NUMBER);
