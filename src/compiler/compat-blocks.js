@@ -42,7 +42,12 @@ const inputs = [
     'sound_volume'
 ];
 
+const booleans = [
+    'operator_threquals'
+];
+
 module.exports = {
     stacked,
-    inputs
+    inputs,
+    booleans
 };
