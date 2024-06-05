@@ -22,6 +22,7 @@ class Scratch3OperatorsBlocks {
             operator_divide: this.divide,
             operator_lt: this.lt,
             operator_equals: this.equals,
+            operator_threquals: this.threquals,
             operator_gt: this.gt,
             operator_and: this.and,
             operator_or: this.or,
@@ -59,6 +60,10 @@ class Scratch3OperatorsBlocks {
 
     equals (args) {
         return Cast.compare(args.OPERAND1, args.OPERAND2) === 0;
+    }
+    
+    threquals (args) {
+        return args.OPERAND1 === args.OPERAND2;
     }
 
     gt (args) {
